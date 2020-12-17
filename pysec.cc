@@ -282,7 +282,7 @@ int main(int argc, char* argv[]) {
       for(unsigned int ijet = 0; ijet < inclusiveJetsCh.size(); ijet++){ //loop over all full jets
           //cout<<"JET ................ "<<ijet<<endl;
           fastjet::PseudoJet fjJet = inclusiveJetsCh.at(ijet);
-		  bool ConditionJets = (fjJet.pt() > 10 && TMath::Abs(fjJet.eta() < (trackEtaCut - jetParameterR)));
+		  bool ConditionJets = (fjJet.pt() > 10 && TMath::Abs(fjJet.eta()) < (trackEtaCut - jetParameterR));
 		  
           if(!ConditionJets) continue; 
 		  
