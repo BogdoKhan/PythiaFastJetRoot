@@ -1,0 +1,8 @@
+ToDo list
+------------------------------------------------------------
+Set |eta| < 0.9 - Done!
+Add eta, phi, eta_jet, phi_jet histogram - Done!
+------------------------------------------------------------
+Add DeltaPhi vs pT graph - Done!
+Add jet area vs pT graph - Done!
+------------------------------------------------------------
