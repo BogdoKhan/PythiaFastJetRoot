@@ -6,3 +6,7 @@ Add eta, phi, eta_jet, phi_jet histogram - Done!
 Add DeltaPhi & pT graph - Done!
 Add jet area & pT graph - Done!
 ------------------------------------------------------------
+Jet area graph TH2I -> TH2D - Done!
+Set pT cutoff as 0.15 GeV - Done!
+Make corrections in code for delta_phi - Done!
+Recalculate delta_phi using correct code

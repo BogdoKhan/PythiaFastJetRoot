@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
    Int_t seed  = -1;     //dummy initialization of the unique initial random seed number for each file.    
    Int_t tune  = 14;     //pythia Monash tune. pythia tunes define procecess that are considered in collisions  
-   Int_t nEvent= 1e6;    //the number of events which will be processed. if you need more change this number and recompile
+   Int_t nEvent= 1e4;    //the number of events which will be processed. if you need more change this number and recompile
    if(argc!=3){  
       cout<<"Usage:"<<endl<<"./pygen <Seed> <jetR>"<<endl;    //just testing whether the number of arguments is correct
       return 0;
@@ -63,14 +63,6 @@ int main(int argc, char* argv[]) {
 
    Double_t jetParameterR   = (Double_t) atof(argv[2]); //initialization of jet cone radius from the second argument
    Double_t trackEtaCut     = 0.9; //psedorapidity  cut on accepted tracks
-                                   //try look yourself what pseudorapidity means
-				   //roughly speaking it is rapidity for massless particles
-				   //at high  energies all particles can be considered massles (80% of all produced particles are pions)
-				   //pseudorapidity is related to polar angle, ie. the angle w.r.t. beam axis
-				   //pseudorapidity 0  ..... direction perpendicular to beam axis
-                                   //pseudorapidity -> infinity   if you approach beam axis
-				   //the |pseudorapidity| < 0.9  selects region of polar angles covered by the ALICE central barrel detectors
-				   //you can try to calculate wich coverage this is in degrees 
 
    TString name;  //auxiliary string
    //__________________________________________________________________________
@@ -99,11 +91,11 @@ int main(int argc, char* argv[]) {
 
    //QCD PROCESSES THAT WILL BE INCLUDED
    pythia.readString("HardQCD:all = on");             //for hard bin configuration -ie you generate events with certain cutoff on energy that was exchanged 
-   pythia.readString("SoftQCD:inelastic = on");     //for minimum bias configuration -ie you generate any event
+   //pythia.readString("SoftQCD:inelastic = on");     //for minimum bias configuration -ie you generate any event
 
    //SKIP PROCESSES WITH Q2 < 5 GeV/c  
-   pythia.readString("PhaseSpace:pTHatMin = 10."); // <<<<<<<<<<<<<<<<<<<<<<< this is the minimum cutoff.    the mimimum cutoff allowed by pythia is 3 
-   //pythia.readString("PhaseSpace:pTHatMax = 5."); // <<<<<<<<<<<<<<<<<<<<<<< this is the maxium cutoff  at the moment commented out
+   pythia.readString("PhaseSpace:pTHatMin = 5."); // <<<<<<<<<<<<<<<<<<<<<<< this is the minimum cutoff.    the mimimum cutoff allowed by pythia is 3 
+   pythia.readString("PhaseSpace:pTHatMax = 10."); // <<<<<<<<<<<<<<<<<<<<<<< this is the maxium cutoff  at the moment commented out
 
    //SWITCH OFF DECAYS TO SECONDARY PARTICLES which would decay via weak interaction
    pythia.readString("310:mayDecay  = off"); //K0s
@@ -282,7 +274,7 @@ int main(int argc, char* argv[]) {
       for(unsigned int ijet = 0; ijet < inclusiveJetsCh.size(); ijet++){ //loop over all full jets
           //cout<<"JET ................ "<<ijet<<endl;
           fastjet::PseudoJet fjJet = inclusiveJetsCh.at(ijet);
-		  bool ConditionJets = (fjJet.pt() > 10. && TMath::Abs(fjJet.eta()) < (trackEtaCut - jetParameterR));
+		  bool ConditionJets = (fjJet.pt() > 0.15 && TMath::Abs(fjJet.eta()) < (trackEtaCut - jetParameterR));
 		  
           if(!ConditionJets) continue; 
 		  
@@ -305,11 +297,11 @@ int main(int argc, char* argv[]) {
 
      }
 //cout<<"=============================================="<<endl;
-	   for (size_t i = 0; i < static_cast<size_t>(pythia.event.size()); i++){
+	   for (size_t i = 0; i < pythia.event.size(); i++){
 		   if (!pythia.event[i].isFinal()) continue;
 		   if (!pythia.event[i].isCharged()) continue;
-		   if (pythia.event[i].pT() > 10. && pythia.event[i].pT() < 50.){
-			   for (size_t j = 0; j < inclusiveJetsCh.size(); j++){
+		   if (pythia.event[i].pT() > 20 && pythia.event[i].pT() < 30){
+			   for (size_t j; j < inclusiveJetsCh.size(); j++){
 				   fastjet::PseudoJet fjJet = inclusiveJetsCh.at(j);
 				   fJetAD->Fill((Double_t) pythia.event[i].pT(), (Double_t) (pythia.event[i].phi()-fjJet.phi()));// HIST: angular difference against pT
 			   }
@@ -349,6 +341,7 @@ int main(int argc, char* argv[]) {
    pythia.stat();
    return 0;
 }
+
 
 
 

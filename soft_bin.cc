@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
    Int_t seed  = -1;     //dummy initialization of the unique initial random seed number for each file.    
    Int_t tune  = 14;     //pythia Monash tune. pythia tunes define procecess that are considered in collisions  
-   Int_t nEvent= 1e6;    //the number of events which will be processed. if you need more change this number and recompile
+   Int_t nEvent= 1e4;    //the number of events which will be processed. if you need more change this number and recompile
    if(argc!=3){  
       cout<<"Usage:"<<endl<<"./pygen <Seed> <jetR>"<<endl;    //just testing whether the number of arguments is correct
       return 0;
@@ -282,7 +282,7 @@ int main(int argc, char* argv[]) {
       for(unsigned int ijet = 0; ijet < inclusiveJetsCh.size(); ijet++){ //loop over all full jets
           //cout<<"JET ................ "<<ijet<<endl;
           fastjet::PseudoJet fjJet = inclusiveJetsCh.at(ijet);
-		  bool ConditionJets = (fjJet.pt() > 10. && TMath::Abs(fjJet.eta()) < (trackEtaCut - jetParameterR));
+		  bool ConditionJets = (fjJet.pt() > 0.15 && TMath::Abs(fjJet.eta()) < (trackEtaCut - jetParameterR));
 		  
           if(!ConditionJets) continue; 
 		  
@@ -305,11 +305,11 @@ int main(int argc, char* argv[]) {
 
      }
 //cout<<"=============================================="<<endl;
-	   for (size_t i = 0; i < static_cast<size_t>(pythia.event.size()); i++){
+	   for (size_t i = 0; i < pythia.event.size(); i++){
 		   if (!pythia.event[i].isFinal()) continue;
 		   if (!pythia.event[i].isCharged()) continue;
-		   if (pythia.event[i].pT() > 10. && pythia.event[i].pT() < 50.){
-			   for (size_t j = 0; j < inclusiveJetsCh.size(); j++){
+		   if (pythia.event[i].pT() > 20 && pythia.event[i].pT() < 30){
+			   for (size_t j; j < inclusiveJetsCh.size(); j++){
 				   fastjet::PseudoJet fjJet = inclusiveJetsCh.at(j);
 				   fJetAD->Fill((Double_t) pythia.event[i].pT(), (Double_t) (pythia.event[i].phi()-fjJet.phi()));// HIST: angular difference against pT
 			   }
@@ -349,6 +349,7 @@ int main(int argc, char* argv[]) {
    pythia.stat();
    return 0;
 }
+
 
 
 
