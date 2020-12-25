@@ -329,7 +329,7 @@ int main(int argc, char* argv[]) {
 		mkdir(folder, 0755);
 	} 
 	
-   TString tag = Form("PP7_pythia_ANTIKT%02d", TMath::Nint(jetParameterR*10) );
+   TString tag = Form("Soft_PYAkT%02d", TMath::Nint(jetParameterR*10) );
 
    TFile* outFile = new TFile(Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed), "RECREATE");
    outFile->cd();

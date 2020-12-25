@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
    Int_t seed  = -1;     //dummy initialization of the unique initial random seed number for each file.    
    Int_t tune  = 14;     //pythia Monash tune. pythia tunes define procecess that are considered in collisions  
-   Int_t nEvent= 1e6;    //the number of events which will be processed. if you need more change this number and recompile
+   Int_t nEvent= 1e5;    //the number of events which will be processed. if you need more change this number and recompile
    if(argc!=3){  
       cout<<"Usage:"<<endl<<"./pygen <Seed> <jetR>"<<endl;    //just testing whether the number of arguments is correct
       return 0;
@@ -210,7 +210,7 @@ int main(int argc, char* argv[]) {
 	
 	TH2D* fJetAD;
 	name = "hJetAD";
-	fJetAD = new TH2D(name.Data(), "Angular difference", 100, 0, 50.0, 100, -2*pi, 2*pi);
+	fJetAD = new TH2D(name.Data(), "Angular difference", 100, 0, 50.0, 100, 0, 2.*pi);
 	fJetAD-> GetXaxis()->SetTitle("Jet pT");
 	fJetAD-> GetYaxis()->SetTitle("Angular difference");
 
@@ -282,7 +282,7 @@ int main(int argc, char* argv[]) {
       for(unsigned int ijet = 0; ijet < inclusiveJetsCh.size(); ijet++){ //loop over all full jets
           //cout<<"JET ................ "<<ijet<<endl;
           fastjet::PseudoJet fjJet = inclusiveJetsCh.at(ijet);
-		  bool ConditionJets = (fjJet.pt() > 10. && TMath::Abs(fjJet.eta()) < (trackEtaCut - jetParameterR));
+		  bool ConditionJets = (fjJet.pt() > 10. && TMath::Abs(fjJet.eta()) < (trackEtaCut));
 		  
           if(!ConditionJets) continue; 
 		  
@@ -298,7 +298,9 @@ int main(int argc, char* argv[]) {
             }*/
 		  
 		  //Histograms: area, pT, eta, phi
+		  if (fjJet.pt() > 10){
 			fJetArea->Fill((Double_t) fjJet.area(), (Double_t) fjJet.pt());
+		  }
 			fJetPt->Fill((Double_t) fjJet.pt()); 
 			fJetEta->Fill((Double_t) fjJet.eta());
 			fJetPhi->Fill((Double_t) fjJet.phi());
@@ -311,7 +313,7 @@ int main(int argc, char* argv[]) {
 		   if (pythia.event[i].pT() > 10. && pythia.event[i].pT() < 50.){
 			   for (size_t j = 0; j < inclusiveJetsCh.size(); j++){
 				   fastjet::PseudoJet fjJet = inclusiveJetsCh.at(j);
-				   fJetAD->Fill((Double_t) pythia.event[i].pT(), (Double_t) (pythia.event[i].phi()-fjJet.phi()));// HIST: angular difference against pT
+				   fJetAD->Fill((Double_t) pythia.event[i].pT(), (Double_t) TMath::Abs((pythia.event[i].phi() + pi)-fjJet.phi()));// HIST: angular difference against pT
 			   }
 		   }
 	   }
