@@ -24,3 +24,5 @@ Add soft bin code:
 - put them into separate folder - Done!
 - rescale pT spectrum into Xsection vs pT - Done!
 - perform calculations with large number of entries - Done!
+------------------------------------------------------------
+Add canvas with comparison of obtained results - Processing...
