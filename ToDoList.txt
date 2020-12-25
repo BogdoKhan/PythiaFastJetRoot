@@ -9,4 +9,18 @@ Add jet area & pT graph - Done!
 Jet area graph TH2I -> TH2D - Done!
 Set pT cutoff as 0.15 GeV - Done!
 Make corrections in code for delta_phi - Done!
-Recalculate delta_phi using correct code
+Recalculate delta_phi using correct code - Done!
+------------------------------------------------------------
+Add hard bin code:
+- set minmax bias - Done!
+- add Xsection and nTrials hists - Done!
+- write summation code and create sum histo - Done!
+- put unsummed hists in separate folder - Done!
+- rescale pT spectrum into Xsection vs pT - Done!
+- perform calculations with large number of entries - Done!
+------------------------------------------------------------
+Add soft bin code:
+- add Xsection and nTrials hists - Done!
+- put them into separate folder - Done!
+- rescale pT spectrum into Xsection vs pT - Done!
+- perform calculations with large number of entries - Done!

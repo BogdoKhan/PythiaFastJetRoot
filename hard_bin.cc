@@ -18,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include "Pythia8/Pythia.h"
+#include "TCanvas.h"
 #include "TTree.h"
 #include "THnSparse.h"
 #include "TH1F.h"
@@ -139,15 +140,30 @@ int main(int argc, char* argv[]) {
   
    //___________________________________________________ 
    //                HISTOGRAMS
+	
+	TH1D* fTrackSum;
+	name = "hTrackPtsum";
+	fTrackSum = new TH1D(name.Data(),"Track pT distribution", 100, 0.0, 50.0);
+	fTrackSum->GetXaxis()->SetTitle("track p_{T} [GeV/c]");
+	fTrackSum->GetYaxis()->SetTitle("Xsection, mbarns");
+	fTrackSum->Sumw2(); 
+	
+	const char* folder;
+	folder = "./Results";
+	struct stat sb;
 
+	if (stat(folder, &sb) != 0 && !S_ISDIR(sb.st_mode)) {
+		mkdir(folder, 0755);
+	} 
 	
-	TProfile* fHistXsection = new TProfile("fHistXsection", "fHistXsection", 1, 0, 1);
-	fHistXsection->GetYaxis()->SetTitle("xsection");
-	
-	TH1F* fHistTrials = new TH1F("fHistTrials", "fHistTrials", 1, 0, 1);
-	fHistTrials->GetYaxis()->SetTitle("trials");
-	
+	TString tag = Form("Hard_PYAkT%02d", TMath::Nint(jetParameterR*10) );
+	TString fName_tag = Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed);
 
+	TFile* outFile = new TFile(fName_tag, "RECREATE");
+	outFile->mkdir("hBin_spectra");
+	outFile->cd("hBin_spectra");
+	outFile->Close();
+	
 
 vector<int> mins = {5, 10, 20, 50, 100, 250};
 vector<int> maxs = {10, 20, 50, 100, 250, 1000};
@@ -157,6 +173,22 @@ for (size_t nr = 0; nr < mins.size(); nr++) {
    pythia.readString(minstr); // min cutoff in phase space
    pythia.readString(maxstr); // max cutoff --/--
 	pythia.init();
+	
+	TH1D* fTrackPt;
+	name = "hTrackPt" + std::to_string(mins[nr]);
+	fTrackPt = new TH1D(name.Data(),"Track pT distribution", 100, 0.0, 50.0);
+	fTrackPt->GetXaxis()->SetTitle("track p_{T} [GeV/c]");
+	fTrackPt->GetYaxis()->SetTitle("counts");
+	fTrackPt->Sumw2(); 
+	
+	TString Xsstring = "fHistXsection" + std::to_string(mins[nr]);
+	TProfile* fHistXsection = new TProfile(Xsstring, "fHistXsection", 1, 0, 1);
+	fHistXsection->GetYaxis()->SetTitle("xsection");
+	
+	TString HTrials = "fHistTrials" + std::to_string(mins[nr]);
+	TH1F* fHistTrials = new TH1F(HTrials, "fHistTrials", 1, 0, 1);
+	fHistTrials->GetYaxis()->SetTitle("trials");
+	
    //___________________________________________________ 
    // BEGIN EVENT LOOP. Generate event. Skip if error.
    for(int iEvent = 0; iEvent < nEvent; iEvent++){
@@ -185,7 +217,7 @@ for (size_t nr = 0; nr < mins.size(); nr++) {
                                                    pythia.event[i].pz(),
                                                    pythia.event[i].pAbs()));	//cout with tracks is suppressed
 			 
-			 
+			 fTrackPt->Fill(pythia.event[i].pT()); //Track pT histo
 		 }				
          
       }
@@ -249,30 +281,33 @@ for (size_t nr = 0; nr < mins.size(); nr++) {
 
    }// End of event loop.
 	
- fHistXsection->Fill(0.5,pythia.info.sigmaGen());
- fHistTrials->Fill(0.5, pythia.info.nAccepted());
+	fHistXsection->Fill(0.5,pythia.info.sigmaGen());
+	fHistTrials->Fill(0.5, pythia.info.nAccepted());
+	
+	Double_t xsection = fHistXsection->GetMean(2);
+	Double_t ntrials =  fHistTrials->Integral();
+	Double_t weight = xsection/ntrials;
+	fTrackPt->Scale(weight);
+	*fTrackSum = (*fTrackSum) + (*fTrackPt);
+	
+	
+	
+	outFile = TFile::Open(fName_tag, "UPDATE");
+	outFile->cd("hBin_spectra");
+	
+	fTrackPt->Write();
+	fHistXsection->Write();
+	fHistTrials->Write();
+	outFile->Close();
 }
 
    //____________________________________________________
    //          SAVE OUTPUT
 
-	const char* folder;
-	folder = "./Results";
-	struct stat sb;
-
-	if (stat(folder, &sb) != 0 && !S_ISDIR(sb.st_mode)) {
-		mkdir(folder, 0755);
-	} 
-	
-   TString tag = Form("Hard_PYAkT%02d", TMath::Nint(jetParameterR*10) );
-
-   TFile* outFile = new TFile(Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed), "RECREATE");
-   outFile->cd();
-
-   fHistXsection->Write();
-   fHistTrials->Write();
-   outFile->Close();
-
+	outFile = TFile::Open(fName_tag, "UPDATE");
+	outFile-> cd();
+	fTrackSum->Write();
+	outFile->Close();
 
    pythia.stat();
    return 0;

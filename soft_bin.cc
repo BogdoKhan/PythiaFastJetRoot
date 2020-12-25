@@ -25,6 +25,7 @@
 #include "TClonesArray.h"
 #include "TFile.h"
 #include "TList.h"
+#include "TProfile.h"
 #include "TVector3.h"
 #include "TMath.h"
 #include "TNtuple.h"
@@ -52,7 +53,7 @@ int main(int argc, char* argv[]) {
 
    Int_t seed  = -1;     //dummy initialization of the unique initial random seed number for each file.    
    Int_t tune  = 14;     //pythia Monash tune. pythia tunes define procecess that are considered in collisions  
-   Int_t nEvent= 1e4;    //the number of events which will be processed. if you need more change this number and recompile
+   Int_t nEvent= 1e5;    //the number of events which will be processed. if you need more change this number and recompile
    if(argc!=3){  
       cout<<"Usage:"<<endl<<"./pygen <Seed> <jetR>"<<endl;    //just testing whether the number of arguments is correct
       return 0;
@@ -63,14 +64,7 @@ int main(int argc, char* argv[]) {
 
    Double_t jetParameterR   = (Double_t) atof(argv[2]); //initialization of jet cone radius from the second argument
    Double_t trackEtaCut     = 0.9; //psedorapidity  cut on accepted tracks
-                                   //try look yourself what pseudorapidity means
-				   //roughly speaking it is rapidity for massless particles
-				   //at high  energies all particles can be considered massles (80% of all produced particles are pions)
-				   //pseudorapidity is related to polar angle, ie. the angle w.r.t. beam axis
-				   //pseudorapidity 0  ..... direction perpendicular to beam axis
-                                   //pseudorapidity -> infinity   if you approach beam axis
-				   //the |pseudorapidity| < 0.9  selects region of polar angles covered by the ALICE central barrel detectors
-				   //you can try to calculate wich coverage this is in degrees 
+                                   
 
    TString name;  //auxiliary string
    //__________________________________________________________________________
@@ -98,11 +92,11 @@ int main(int argc, char* argv[]) {
    pythia.readString(Form("Random:seed = %d",seed));
 
    //QCD PROCESSES THAT WILL BE INCLUDED
-   pythia.readString("HardQCD:all = on");             //for hard bin configuration -ie you generate events with certain cutoff on energy that was exchanged 
+   //pythia.readString("HardQCD:all = on");             //for hard bin configuration -ie you generate events with certain cutoff on energy that was exchanged 
    pythia.readString("SoftQCD:inelastic = on");     //for minimum bias configuration -ie you generate any event
 
    //SKIP PROCESSES WITH Q2 < 5 GeV/c  
-   pythia.readString("PhaseSpace:pTHatMin = 10."); // <<<<<<<<<<<<<<<<<<<<<<< this is the minimum cutoff.    the mimimum cutoff allowed by pythia is 3 
+   //pythia.readString("PhaseSpace:pTHatMin = 10."); // <<<<<<<<<<<<<<<<<<<<<<< this is the minimum cutoff.    the mimimum cutoff allowed by pythia is 3 
    //pythia.readString("PhaseSpace:pTHatMax = 5."); // <<<<<<<<<<<<<<<<<<<<<<< this is the maxium cutoff  at the moment commented out
 
    //SWITCH OFF DECAYS TO SECONDARY PARTICLES which would decay via weak interaction
@@ -152,69 +146,24 @@ int main(int argc, char* argv[]) {
    //___________________________________________________ 
    //                HISTOGRAMS
 
-   
-   //PT DISTRIBUTION OF TRACKS
-   TH1D* fTrackPt;
-   name = "hTrackPt";
-   fTrackPt = new TH1D(name.Data(),"Track pT distribution", 100, 0.0, 30.0);
-   fTrackPt->GetXaxis()->SetTitle("track p_{T} [GeV/c]");
-   fTrackPt->GetYaxis()->SetTitle("counts");
-   fTrackPt->Sumw2(); //tells to root to properly handle statistical errors
-	
-	//Pseudorapidity distribution of tracks
-	TH1D* fTrackEta;
-   name = "hTrackEta";
-   fTrackEta = new TH1D(name.Data(),"Track pseudorapidity distribution", 100, -1.0, 1.0);
-   fTrackEta->GetXaxis()->SetTitle("track eta []");
-   fTrackEta->GetYaxis()->SetTitle("counts");
-   fTrackEta->Sumw2(); //tells to root to properly handle statistical errors
-	
-	//Azimuthal distribution of tracks
-	TH1D* fTrackPhi;
-   name = "hTrackPhi";
-   fTrackPhi = new TH1D(name.Data(),"Track phi distribution", 100, -pi, pi);
-   fTrackPhi->GetXaxis()->SetTitle("track phi []");
-   fTrackPhi->GetYaxis()->SetTitle("counts");
-   fTrackPhi->Sumw2(); //tells to root to properly handle statistical errors
-	
-	
-   //PT DISTRIBUTIONS OF JETS
-   TH1D* fJetPt;
-   name = "hJetPt"; 
-   fJetPt = new TH1D(name.Data(), "Jet pT distribution", 100, 0, 50.0);
-   fJetPt->GetXaxis()->SetTitle("jet p_{T} [GeV/c]");
-   fJetPt->GetYaxis()->SetTitle("counts");
-   fJetPt->Sumw2();
-	
-	//Pseudorapidity distribution of jets
-	TH1D* fJetEta;
-   name = "hJetEta";
-   fJetEta = new TH1D(name.Data(),"Jet pseudorapidity distribution", 100, -1.0, 1.0);
-   fJetEta->GetXaxis()->SetTitle("Jet eta []");
-   fJetEta->GetYaxis()->SetTitle("counts");
-   fJetEta->Sumw2(); 
-	
-	//Azimuthal distribution of jets
-	TH1D* fJetPhi;
-   	name = "hJetPhi";
-   	fJetPhi = new TH1D(name.Data(),"Jet phi distribution", 100, 0, 2*pi);
-   	fJetPhi->GetXaxis()->SetTitle("Jet phi []");
-   	fJetPhi->GetYaxis()->SetTitle("counts");
-   	fJetPhi->Sumw2(); 
-	
-	TH2D* fJetArea;
-	name = "hJetArea";
-	fJetArea = new TH2D(name.Data(), "Jet area", 100, 0, 1.0, 100, 0, 50.0);
-	fJetArea-> GetXaxis()->SetTitle("Jet area");
-	fJetArea-> GetYaxis()->SetTitle("Jet pT");
-	
-	TH2D* fJetAD;
-	name = "hJetAD";
-	fJetAD = new TH2D(name.Data(), "Angular difference", 100, 0, 50.0, 100, -2*pi, 2*pi);
-	fJetAD-> GetXaxis()->SetTitle("Jet pT");
-	fJetAD-> GetYaxis()->SetTitle("Angular difference");
 
-
+	//PT DISTRIBUTION OF TRACKS
+	TH1D* fTrackPt;
+	name = "hTrackPt";
+	fTrackPt = new TH1D(name.Data(),"Track pT distribution", 100, 0.0, 50.0);
+	fTrackPt->GetXaxis()->SetTitle("track p_{T} [GeV/c]");
+	fTrackPt->GetYaxis()->SetTitle("Xsection, mbarns");
+	fTrackPt->Sumw2(); //tells to root to properly handle statistical errors
+	
+	TString Xsstring = "fHistXsection";
+	TProfile* fHistXsection = new TProfile(Xsstring, "fHistXsection", 1, 0, 1);
+	fHistXsection->GetYaxis()->SetTitle("xsection");
+	
+	TString HTrials = "fHistTrials";
+	TH1F* fHistTrials = new TH1F(HTrials, "fHistTrials", 1, 0, 1);
+	fHistTrials->GetYaxis()->SetTitle("trials");
+	
+	
 
    //___________________________________________________ 
    // BEGIN EVENT LOOP. Generate event. Skip if error.
@@ -229,14 +178,8 @@ int main(int argc, char* argv[]) {
 
       for(Int_t i = 0; i < pythia.event.size(); i++){
          if(!pythia.event[i].isFinal()) continue;  //select FINAL state PARTICLES ONLY  (after electromagnetic and strong decays)
-	                                          // if you would comment this line out you would see that
-						  //  pythia would give you also  quarks, color strings, resonances
-						  //  pythia event contains all history of the scattering process
-						  //  starting from the initial scatterd quarks till the final state particles
-						  //  in detector you measure final state particles only 
+	                                       
          if(!pythia.event[i].isCharged()) continue; //select CHARGED PARTICLES   - neutral particles do not make tracks in detector
-          //TASK: here should be also some cut on pseudorapidity of ALICE central barrel, try to implement is
-		 //      plot pseudorapity and azimuthal distribution of tracks with pT > 150 MeV
 		 if(pythia.event[i].pT() > 0.15 && TMath::Abs(pythia.event[i].eta()) < trackEtaCut) {
 			 
 			 fjInputs.push_back( fastjet::PseudoJet(pythia.event[i].px(),         //make a list of charged particle 4-vectors from which he makes a jet
@@ -244,8 +187,6 @@ int main(int argc, char* argv[]) {
                                                    pythia.event[i].pz(),
                                                    pythia.event[i].pAbs()));	//cout with tracks is suppressed
 			 
-			 fTrackEta->Fill(pythia.event[i].eta());
-			 fTrackPhi->Fill(pythia.event[i].phi());
 			 fTrackPt->Fill(pythia.event[i].pT()); //FILL HISTOGRAM WITH TRACK PT
 		 }				
          
@@ -279,7 +220,7 @@ int main(int argc, char* argv[]) {
 	   
       //_______________________________________________________________________________________
       //LOOP OVER jets and print their CONSTITUENTS
-      for(unsigned int ijet = 0; ijet < inclusiveJetsCh.size(); ijet++){ //loop over all full jets
+/*      for(unsigned int ijet = 0; ijet < inclusiveJetsCh.size(); ijet++){ //loop over all full jets
           //cout<<"JET ................ "<<ijet<<endl;
           fastjet::PseudoJet fjJet = inclusiveJetsCh.at(ijet);
 		  bool ConditionJets = (fjJet.pt() > 0.15 && TMath::Abs(fjJet.eta()) < (trackEtaCut - jetParameterR));
@@ -287,7 +228,7 @@ int main(int argc, char* argv[]) {
           if(!ConditionJets) continue; 
 		  
             vector<fastjet::PseudoJet> constituents =  clustSeq_Sig.constituents(inclusiveJetsCh[ijet]); //for jet get list of constituents
-            /*for(unsigned int ict = 0; ict < constituents.size(); ict++){
+            for(unsigned int ict = 0; ict < constituents.size(); ict++){
                if(constituents.at(ict).pt() < 0.15) continue;
                //cout<<"JETC pt="<<constituents.at(ict).pt() 
                //    <<" eta ="<<constituents.at(ict).eta() 
@@ -295,17 +236,16 @@ int main(int argc, char* argv[]) {
                //	<<" lab ="<<constituents.at(ict).user_index()<<endl;
 				
 				
-            }*/
+            }
 		  
 		  //Histograms: area, pT, eta, phi
-			fJetArea->Fill((Double_t) fjJet.area(), (Double_t) fjJet.pt());
+			
 			fJetPt->Fill((Double_t) fjJet.pt()); 
-			fJetEta->Fill((Double_t) fjJet.eta());
-			fJetPhi->Fill((Double_t) fjJet.phi());
+			
 
-     }
+     }*/
 //cout<<"=============================================="<<endl;
-	   for (size_t i = 0; i < pythia.event.size(); i++){
+/*	   for (size_t i = 0; i < pythia.event.size(); i++){
 		   if (!pythia.event[i].isFinal()) continue;
 		   if (!pythia.event[i].isCharged()) continue;
 		   if (pythia.event[i].pT() > 20 && pythia.event[i].pT() < 30){
@@ -314,13 +254,14 @@ int main(int argc, char* argv[]) {
 				   fJetAD->Fill((Double_t) pythia.event[i].pT(), (Double_t) (pythia.event[i].phi()-fjJet.phi()));// HIST: angular difference against pT
 			   }
 		   }
-	   }
+	   }*/
 
    }// End of event loop.
+	
+	fHistXsection->Fill(0.5,pythia.info.sigmaGen());
+	fHistTrials->Fill(0.5, pythia.info.nAccepted());
 
-   //____________________________________________________
-   //          SAVE OUTPUT
-
+//-------------------Check if Results folder exists-----------------------
 	const char* folder;
 	folder = "./Results";
 	struct stat sb;
@@ -328,21 +269,26 @@ int main(int argc, char* argv[]) {
 	if (stat(folder, &sb) != 0 && !S_ISDIR(sb.st_mode)) {
 		mkdir(folder, 0755);
 	} 
-	
-   TString tag = Form("Soft_PYAkT%02d", TMath::Nint(jetParameterR*10) );
 
-   TFile* outFile = new TFile(Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed), "RECREATE");
-   outFile->cd();
+//------------------Recreate results ROOT file---------------------------
+   TString tag = Form("Soft_PYAkT%02d", TMath::Nint(jetParameterR*10) );
+	TString fName_tag = Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed);
+
+   TFile* outFile = new TFile(fName_tag, "RECREATE");
+   outFile->mkdir("hBinSpectra");
+	outFile->cd("hBinSpectra");
+	
+	fHistXsection->Write();
+	fHistTrials->Write();
+	
+	Double_t xsection = fHistXsection->GetMean(2);
+	Double_t ntrials =  fHistTrials->Integral();
+	Double_t weight = xsection/ntrials;
+	fTrackPt->Scale(weight);
+	
+	outFile->cd("../");
 
    	fTrackPt->Write();
-	fTrackEta->Write();
-	fTrackPhi->Write();
-   	fJetPt->Write();
-	fJetEta->Write();
-	fJetPhi->Write();
-	fJetArea->Write();
-	fJetAD->Write();
-
    	outFile->Close();
 
 
