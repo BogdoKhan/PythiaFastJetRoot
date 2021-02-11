@@ -1,0 +1,764 @@
+
+ *------------------------------------------------------------------------------------* 
+ |                                                                                    | 
+ |  *------------------------------------------------------------------------------*  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  |   PPP   Y   Y  TTTTT  H   H  III    A      Welcome to the Lund Monte Carlo!  |  | 
+ |  |   P  P   Y Y     T    H   H   I    A A     This is PYTHIA version 8.303      |  | 
+ |  |   PPP     Y      T    HHHHH   I   AAAAA    Last date of change:  1 Sep 2020  |  | 
+ |  |   P       Y      T    H   H   I   A   A                                      |  | 
+ |  |   P       Y      T    H   H  III  A   A    Now is 12 Feb 2021 at 01:13:19    |  | 
+ |  |                                                                              |  | 
+ |  |   Christian Bierlich;  Department of Astronomy and Theoretical Physics,      |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: christian.bierlich@thep.lu.se                                   |  | 
+ |  |   Nishita Desai;  Department of Theoretical Physics, Tata Institute,         |  | 
+ |  |      Homi Bhabha Road, Mumbai 400005, India;                                 |  | 
+ |  |      e-mail: desai@theory.tifr.res.in                                        |  | 
+ |  |   Leif Gellersen;  Department of Astronomy and Theoretical Physics,          |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: leif.gellersen@thep.lu.se                                       |  | 
+ |  |   Ilkka Helenius;  Department of Physics, University of Jyvaskyla,           |  | 
+ |  |      P.O. Box 35, FI-40014 University of Jyvaskyla, Finland;                 |  | 
+ |  |      e-mail: ilkka.m.helenius@jyu.fi                                         |  | 
+ |  |   Philip Ilten;  Department of Physics,                                      |  | 
+ |  |      University of Cincinnati, Cincinnati, OH 45221, USA;                    |  | 
+ |  |      School of Physics and Astronomy,                                        |  | 
+ |  |      University of Birmingham, Birmingham, B152 2TT, UK;                     |  | 
+ |  |      e-mail: philten@cern.ch                                                 |  | 
+ |  |   Leif Lonnblad;  Department of Astronomy and Theoretical Physics,           |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: leif.lonnblad@thep.lu.se                                        |  | 
+ |  |   Stephen Mrenna;  Computing Division, Simulations Group,                    |  | 
+ |  |      Fermi National Accelerator Laboratory, MS 234, Batavia, IL 60510, USA;  |  | 
+ |  |      e-mail: mrenna@fnal.gov                                                 |  | 
+ |  |   Stefan Prestel;  Department of Astronomy and Theoretical Physics,          |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: stefan.prestel@thep.lu.se                                       |  | 
+ |  |   Christine O. Rasmussen;  Department of Astronomy and Theoretical Physics,  |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: christine.rasmussen@thep.lu.se                                  |  | 
+ |  |   Torbjorn Sjostrand;  Department of Astronomy and Theoretical Physics,      |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: torbjorn@thep.lu.se                                             |  | 
+ |  |   Peter Skands;  School of Physics and Astronomy,                            |  | 
+ |  |      Monash University, PO Box 27, 3800 Melbourne, Australia;                |  | 
+ |  |      e-mail: peter.skands@monash.edu                                         |  | 
+ |  |   Marius Utheim;  Department of Astronomy and Theoretical Physics,           |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: marius.utheim@thep.lu.se                                        |  | 
+ |  |                                                                              |  | 
+ |  |   The main program reference is 'An Introduction to PYTHIA 8.2',             |  | 
+ |  |   T. Sjostrand et al, Comput. Phys. Commun. 191 (2015) 159                   |  | 
+ |  |   [arXiv:1410.3012 [hep-ph]]                                                 |  | 
+ |  |                                                                              |  | 
+ |  |   The main physics reference is the 'PYTHIA 6.4 Physics and Manual',         |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, JHEP05 (2006) 026 [hep-ph/0603175]  |  | 
+ |  |                                                                              |  | 
+ |  |   An archive of program versions and documentation is found on the web:      |  | 
+ |  |   http://www.thep.lu.se/Pythia                                               |  | 
+ |  |                                                                              |  | 
+ |  |   This program is released under the GNU General Public Licence version 2.   |  | 
+ |  |   Please respect the MCnet Guidelines for Event Generator Authors and Users. |  | 
+ |  |                                                                              |  | 
+ |  |   Disclaimer: this program comes without any guarantees.                     |  | 
+ |  |   Beware of errors and use common sense when interpreting results.           |  | 
+ |  |                                                                              |  | 
+ |  |   Copyright (C) 2020 Torbjorn Sjostrand                                      |  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  *------------------------------------------------------------------------------*  | 
+ |                                                                                    | 
+ *------------------------------------------------------------------------------------* 
+
+ PYTHIA Warning from Pythia::init: should not combine softQCD processes with hard ones  
+
+ *-------  PYTHIA Process Initialization  --------------------------*
+ |                                                                  |
+ | We collide p+ with p+ at a CM energy of 1.300e+04 GeV            |
+ |                                                                  |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | Subprocess                                    Code |   Estimated |
+ |                                                    |    max (mb) |
+ |                                                    |             |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | non-diffractive                                101 |   5.642e+01 |
+ | A B -> X B single diffractive                  103 |   6.416e+00 |
+ | A B -> A X single diffractive                  104 |   6.416e+00 |
+ | A B -> X X double diffractive                  105 |   8.798e+00 |
+ | A B -> A X B central diffractive               106 |   0.000e+00 |
+ | g g -> g g                                     111 |   1.409e+00 |
+ | g g -> q qbar (uds)                            112 |   2.956e-02 |
+ | q g -> q g                                     113 |   1.132e+00 |
+ | q q(bar)' -> q q(bar)'                         114 |   1.198e-01 |
+ | q qbar -> g g                                  115 |   8.596e-04 |
+ | q qbar -> q' qbar' (uds)                       116 |   6.885e-04 |
+ | g g -> c cbar                                  121 |   9.772e-03 |
+ | q qbar -> c cbar                               122 |   2.284e-04 |
+ | g g -> b bbar                                  123 |   7.979e-03 |
+ | q qbar -> b bbar                               124 |   2.166e-04 |
+ |                                                                  |
+ *-------  End PYTHIA Process Initialization -----------------------*
+
+ *-------  PYTHIA Multiparton Interactions Initialization  ---------* 
+ |                                                                  | 
+ |                   sigmaNonDiffractive =    56.42 mb              | 
+ |                                                                  | 
+ |    pT0 =  2.60 gives sigmaInteraction =   314.00 mb: accepted    | 
+ |                                                                  | 
+ *-------  End PYTHIA Multiparton Interactions Initialization  -----* 
+
+ *-------  PYTHIA Multiparton Interactions Initialization  ---------* 
+ |                                                                  | 
+ |                          diffraction XB                          | 
+ |                                                                  | 
+ |   diffractive mass = 1.00e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.56 gives sigmaInteraction =    24.91 mb: accepted    | 
+ |   diffractive mass = 1.61e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.62 gives sigmaInteraction =    24.02 mb: accepted    | 
+ |   diffractive mass = 2.60e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.68 gives sigmaInteraction =    22.20 mb: accepted    | 
+ |   diffractive mass = 4.20e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.76 gives sigmaInteraction =    19.91 mb: accepted    | 
+ |   diffractive mass = 6.77e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.84 gives sigmaInteraction =    18.05 mb: accepted    | 
+ |   diffractive mass = 1.09e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.93 gives sigmaInteraction =    16.88 mb: accepted    | 
+ |   diffractive mass = 1.76e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.03 gives sigmaInteraction =    16.45 mb: accepted    | 
+ |   diffractive mass = 2.84e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.14 gives sigmaInteraction =    16.92 mb: accepted    | 
+ |   diffractive mass = 4.58e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.27 gives sigmaInteraction =    18.49 mb: accepted    | 
+ |   diffractive mass = 7.39e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.41 gives sigmaInteraction =    20.96 mb: accepted    | 
+ |   diffractive mass = 1.19e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.56 gives sigmaInteraction =    24.97 mb: accepted    | 
+ |   diffractive mass = 1.92e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.73 gives sigmaInteraction =    29.92 mb: accepted    | 
+ |   diffractive mass = 3.10e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.91 gives sigmaInteraction =    36.18 mb: accepted    | 
+ |   diffractive mass = 5.00e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.12 gives sigmaInteraction =    42.95 mb: accepted    | 
+ |   diffractive mass = 8.06e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.35 gives sigmaInteraction =    51.51 mb: accepted    | 
+ |   diffractive mass = 1.30e+04 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.60 gives sigmaInteraction =    60.00 mb: accepted    | 
+ |                                                                  | 
+ *-------  End PYTHIA Multiparton Interactions Initialization  -----* 
+ PYTHIA Warning in MultipartonInteractions::init: maximum increased by factor 4.125
+
+ *-------  PYTHIA Multiparton Interactions Initialization  ---------* 
+ |                                                                  | 
+ |                          diffraction AX                          | 
+ |                                                                  | 
+ |   diffractive mass = 1.00e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.56 gives sigmaInteraction =    24.96 mb: accepted    | 
+ |   diffractive mass = 1.61e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.62 gives sigmaInteraction =    24.06 mb: accepted    | 
+ |   diffractive mass = 2.60e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.68 gives sigmaInteraction =    21.91 mb: accepted    | 
+ |   diffractive mass = 4.20e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.76 gives sigmaInteraction =    20.00 mb: accepted    | 
+ |   diffractive mass = 6.77e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.84 gives sigmaInteraction =    18.11 mb: accepted    | 
+ |   diffractive mass = 1.09e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.93 gives sigmaInteraction =    16.89 mb: accepted    | 
+ |   diffractive mass = 1.76e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.03 gives sigmaInteraction =    16.46 mb: accepted    | 
+ |   diffractive mass = 2.84e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.14 gives sigmaInteraction =    17.02 mb: accepted    | 
+ |   diffractive mass = 4.58e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.27 gives sigmaInteraction =    18.50 mb: accepted    | 
+ |   diffractive mass = 7.39e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.41 gives sigmaInteraction =    21.07 mb: accepted    | 
+ |   diffractive mass = 1.19e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.56 gives sigmaInteraction =    25.11 mb: accepted    | 
+ |   diffractive mass = 1.92e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.73 gives sigmaInteraction =    29.90 mb: accepted    | 
+ |   diffractive mass = 3.10e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.91 gives sigmaInteraction =    36.20 mb: accepted    | 
+ |   diffractive mass = 5.00e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.12 gives sigmaInteraction =    42.81 mb: accepted    | 
+ |   diffractive mass = 8.06e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.35 gives sigmaInteraction =    51.37 mb: accepted    | 
+ |   diffractive mass = 1.30e+04 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.60 gives sigmaInteraction =    60.46 mb: accepted    | 
+ |                                                                  | 
+ *-------  End PYTHIA Multiparton Interactions Initialization  -----* 
+
+ *-------  PYTHIA Multiparton Interactions Initialization  ---------* 
+ |                                                                  | 
+ |                          diffraction AXB                         | 
+ |                                                                  | 
+ |   diffractive mass = 1.00e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.56 gives sigmaInteraction =     5.87 mb: rejected    | 
+ |    pT0 =  0.50 gives sigmaInteraction =     8.75 mb: rejected    | 
+ |    pT0 =  0.45 gives sigmaInteraction =    13.18 mb: accepted    | 
+ |   diffractive mass = 1.61e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.62 gives sigmaInteraction =     4.76 mb: rejected    | 
+ |    pT0 =  0.56 gives sigmaInteraction =     6.96 mb: rejected    | 
+ |    pT0 =  0.50 gives sigmaInteraction =    10.18 mb: rejected    | 
+ |    pT0 =  0.45 gives sigmaInteraction =    15.06 mb: accepted    | 
+ |   diffractive mass = 2.60e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.68 gives sigmaInteraction =     3.83 mb: rejected    | 
+ |    pT0 =  0.62 gives sigmaInteraction =     5.47 mb: rejected    | 
+ |    pT0 =  0.55 gives sigmaInteraction =     7.86 mb: rejected    | 
+ |    pT0 =  0.50 gives sigmaInteraction =    11.47 mb: accepted    | 
+ |   diffractive mass = 4.20e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.76 gives sigmaInteraction =     3.10 mb: rejected    | 
+ |    pT0 =  0.68 gives sigmaInteraction =     4.35 mb: rejected    | 
+ |    pT0 =  0.61 gives sigmaInteraction =     6.11 mb: rejected    | 
+ |    pT0 =  0.55 gives sigmaInteraction =     8.62 mb: rejected    | 
+ |    pT0 =  0.50 gives sigmaInteraction =    12.29 mb: accepted    | 
+ |   diffractive mass = 6.77e+01 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.84 gives sigmaInteraction =     2.69 mb: rejected    | 
+ |    pT0 =  0.76 gives sigmaInteraction =     3.62 mb: rejected    | 
+ |    pT0 =  0.68 gives sigmaInteraction =     4.89 mb: rejected    | 
+ |    pT0 =  0.61 gives sigmaInteraction =     6.73 mb: rejected    | 
+ |    pT0 =  0.55 gives sigmaInteraction =     9.40 mb: rejected    | 
+ |    pT0 =  0.50 gives sigmaInteraction =    13.21 mb: accepted    | 
+ |   diffractive mass = 1.09e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  0.93 gives sigmaInteraction =     2.48 mb: rejected    | 
+ |    pT0 =  0.84 gives sigmaInteraction =     3.22 mb: rejected    | 
+ |    pT0 =  0.75 gives sigmaInteraction =     4.22 mb: rejected    | 
+ |    pT0 =  0.68 gives sigmaInteraction =     5.52 mb: rejected    | 
+ |    pT0 =  0.61 gives sigmaInteraction =     7.48 mb: rejected    | 
+ |    pT0 =  0.55 gives sigmaInteraction =    10.21 mb: rejected    | 
+ |    pT0 =  0.50 gives sigmaInteraction =    14.14 mb: accepted    | 
+ |   diffractive mass = 1.76e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.03 gives sigmaInteraction =     2.51 mb: rejected    | 
+ |    pT0 =  0.93 gives sigmaInteraction =     3.12 mb: rejected    | 
+ |    pT0 =  0.84 gives sigmaInteraction =     3.92 mb: rejected    | 
+ |    pT0 =  0.75 gives sigmaInteraction =     4.96 mb: rejected    | 
+ |    pT0 =  0.68 gives sigmaInteraction =     6.41 mb: rejected    | 
+ |    pT0 =  0.61 gives sigmaInteraction =     8.40 mb: rejected    | 
+ |    pT0 =  0.55 gives sigmaInteraction =    11.14 mb: accepted    | 
+ |   diffractive mass = 2.84e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.14 gives sigmaInteraction =     2.72 mb: rejected    | 
+ |    pT0 =  1.03 gives sigmaInteraction =     3.27 mb: rejected    | 
+ |    pT0 =  0.93 gives sigmaInteraction =     3.98 mb: rejected    | 
+ |    pT0 =  0.83 gives sigmaInteraction =     4.80 mb: rejected    | 
+ |    pT0 =  0.75 gives sigmaInteraction =     6.01 mb: rejected    | 
+ |    pT0 =  0.68 gives sigmaInteraction =     7.48 mb: rejected    | 
+ |    pT0 =  0.61 gives sigmaInteraction =     9.46 mb: rejected    | 
+ |    pT0 =  0.55 gives sigmaInteraction =    12.40 mb: accepted    | 
+ |   diffractive mass = 4.58e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.27 gives sigmaInteraction =     3.03 mb: rejected    | 
+ |    pT0 =  1.14 gives sigmaInteraction =     3.59 mb: rejected    | 
+ |    pT0 =  1.03 gives sigmaInteraction =     4.25 mb: rejected    | 
+ |    pT0 =  0.92 gives sigmaInteraction =     5.08 mb: rejected    | 
+ |    pT0 =  0.83 gives sigmaInteraction =     5.98 mb: rejected    | 
+ |    pT0 =  0.75 gives sigmaInteraction =     7.22 mb: rejected    | 
+ |    pT0 =  0.67 gives sigmaInteraction =     8.77 mb: rejected    | 
+ |    pT0 =  0.61 gives sigmaInteraction =    11.04 mb: accepted    | 
+ |   diffractive mass = 7.39e+02 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.41 gives sigmaInteraction =     3.49 mb: rejected    | 
+ |    pT0 =  1.27 gives sigmaInteraction =     4.08 mb: rejected    | 
+ |    pT0 =  1.14 gives sigmaInteraction =     4.76 mb: rejected    | 
+ |    pT0 =  1.02 gives sigmaInteraction =     5.56 mb: rejected    | 
+ |    pT0 =  0.92 gives sigmaInteraction =     6.45 mb: rejected    | 
+ |    pT0 =  0.83 gives sigmaInteraction =     7.53 mb: rejected    | 
+ |    pT0 =  0.75 gives sigmaInteraction =     8.81 mb: rejected    | 
+ |    pT0 =  0.67 gives sigmaInteraction =    10.57 mb: rejected    | 
+ |    pT0 =  0.61 gives sigmaInteraction =    12.74 mb: accepted    | 
+ |   diffractive mass = 1.19e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.56 gives sigmaInteraction =     4.02 mb: rejected    | 
+ |    pT0 =  1.40 gives sigmaInteraction =     4.67 mb: rejected    | 
+ |    pT0 =  1.26 gives sigmaInteraction =     5.45 mb: rejected    | 
+ |    pT0 =  1.14 gives sigmaInteraction =     6.29 mb: rejected    | 
+ |    pT0 =  1.02 gives sigmaInteraction =     7.14 mb: rejected    | 
+ |    pT0 =  0.92 gives sigmaInteraction =     8.23 mb: rejected    | 
+ |    pT0 =  0.83 gives sigmaInteraction =     9.47 mb: rejected    | 
+ |    pT0 =  0.75 gives sigmaInteraction =    11.02 mb: accepted    | 
+ |   diffractive mass = 1.92e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.73 gives sigmaInteraction =     4.62 mb: rejected    | 
+ |    pT0 =  1.55 gives sigmaInteraction =     5.39 mb: rejected    | 
+ |    pT0 =  1.40 gives sigmaInteraction =     6.32 mb: rejected    | 
+ |    pT0 =  1.26 gives sigmaInteraction =     7.17 mb: rejected    | 
+ |    pT0 =  1.13 gives sigmaInteraction =     8.15 mb: rejected    | 
+ |    pT0 =  1.02 gives sigmaInteraction =     9.20 mb: rejected    | 
+ |    pT0 =  0.92 gives sigmaInteraction =    10.43 mb: rejected    | 
+ |    pT0 =  0.83 gives sigmaInteraction =    11.72 mb: accepted    | 
+ |   diffractive mass = 3.10e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  1.91 gives sigmaInteraction =     5.27 mb: rejected    | 
+ |    pT0 =  1.72 gives sigmaInteraction =     6.18 mb: rejected    | 
+ |    pT0 =  1.55 gives sigmaInteraction =     7.09 mb: rejected    | 
+ |    pT0 =  1.39 gives sigmaInteraction =     8.17 mb: rejected    | 
+ |    pT0 =  1.26 gives sigmaInteraction =     9.25 mb: rejected    | 
+ |    pT0 =  1.13 gives sigmaInteraction =    10.53 mb: rejected    | 
+ |    pT0 =  1.02 gives sigmaInteraction =    11.73 mb: accepted    | 
+ |   diffractive mass = 5.00e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.12 gives sigmaInteraction =     5.98 mb: rejected    | 
+ |    pT0 =  1.91 gives sigmaInteraction =     6.97 mb: rejected    | 
+ |    pT0 =  1.72 gives sigmaInteraction =     8.10 mb: rejected    | 
+ |    pT0 =  1.55 gives sigmaInteraction =     9.22 mb: rejected    | 
+ |    pT0 =  1.39 gives sigmaInteraction =    10.52 mb: rejected    | 
+ |    pT0 =  1.25 gives sigmaInteraction =    11.98 mb: accepted    | 
+ |   diffractive mass = 8.06e+03 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.35 gives sigmaInteraction =     6.55 mb: rejected    | 
+ |    pT0 =  2.12 gives sigmaInteraction =     7.70 mb: rejected    | 
+ |    pT0 =  1.90 gives sigmaInteraction =     8.90 mb: rejected    | 
+ |    pT0 =  1.71 gives sigmaInteraction =    10.28 mb: rejected    | 
+ |    pT0 =  1.54 gives sigmaInteraction =    11.77 mb: accepted    | 
+ |   diffractive mass = 1.30e+04 GeV and sigmaNorm =    10.00 mb    | 
+ |    pT0 =  2.60 gives sigmaInteraction =     7.18 mb: rejected    | 
+ |    pT0 =  2.34 gives sigmaInteraction =     8.46 mb: rejected    | 
+ |    pT0 =  2.11 gives sigmaInteraction =     9.78 mb: rejected    | 
+ |    pT0 =  1.90 gives sigmaInteraction =    11.40 mb: accepted    | 
+ |                                                                  | 
+ *-------  End PYTHIA Multiparton Interactions Initialization  -----* 
+
+ *-------  PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec + WVec Settings (changes only)  ------------------* 
+ |                                                                                                                 | 
+ | Name                                          |                      Now |      Default         Min         Max | 
+ |                                               |                          |                                      | 
+ | Beams:eCM                                     |                13000.000 |    14000.000         0.0             | 
+ | HardQCD:all                                   |                       on |          off                         | 
+ | PhaseSpace:pTHatMax                           |                 30.00000 |     -1.00000                         | 
+ | PhaseSpace:pTHatMin                           |                 20.00000 |          0.0         0.0             | 
+ | Random:seed                                   |                     5024 |           -1               900000000 | 
+ | Random:setSeed                                |                       on |          off                         | 
+ | SoftQCD:inelastic                             |                       on |          off                         | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec + WVec Settings  -----------------------------* 
+
+ --------  PYTHIA Particle Data Table (changed only)  ------------------------------------------------------------------------------
+ 
+      id   name            antiName         spn chg col      m0        mWidth      mMin       mMax       tau0    res dec ext vis wid
+             no onMode   bRatio   meMode     products 
+
+     310  K_S0                                1   0   0    0.49761    0.00000    0.49761    0.49761  2.68420e+01   0   0   0   1   0
+              0     1   0.6922420    0      211     -211 
+              1     1   0.3070073    0      111      111 
+              2     1   0.0000479   12      211     -211       11      -11 
+              3     1   0.0003501   22      -12       11      211 
+              4     1   0.0003501   22       12      -11     -211 
+              5     1   0.0000026    0       22       22 
+
+    3112  Sigma-           Sigmabar+          2  -3   0    1.19745    0.00000    1.19745    1.19745  4.43400e+01   0   0   0   1   0
+              0     1   0.9984757    0     2112     -211 
+              1     1   0.0010170   22      -12       11     2112 
+              2     1   0.0004500   22      -14       13     2112 
+              3     1   0.0000573   22      -12       11     3122 
+
+    3122  Lambda0          Lambdabar0         2   0   0    1.11568    0.00000    1.11568    1.11568  7.89000e+01   0   0   0   1   0
+              0     1   0.6391668    0     2212     -211 
+              1     1   0.3580935    0     2112      111 
+              2     1   0.0017505    0     2112       22 
+              3     1   0.0008322   22      -12       11     2212 
+              4     1   0.0001570   22      -14       13     2212 
+
+    3222  Sigma+           Sigmabar-          2   3   0    1.18937    0.00000    1.18937    1.18937  2.40400e+01   0   0   0   1   0
+              0     1   0.5156743    0     2212      111 
+              1     1   0.4830758    0     2112      211 
+              2     1   0.0012299    0     2212       22 
+              3     1   0.0000200   22      -11       12     3122 
+
+    3312  Xi-              Xibar+             2  -3   0    1.32171    0.00000    1.32171    1.32171  4.91000e+01   0   0   0   1   0
+              0     1   0.9988730    0     3122     -211 
+              1     1   0.0001270    0     3112       22 
+              2     1   0.0005630   22      -12       11     3122 
+              3     1   0.0003500   22      -14       13     3122 
+              4     1   0.0000870   22      -12       11     3212 
+
+    3322  Xi0              Xibar0             2   0   0    1.31486    0.00000    1.31486    1.31486  8.71000e+01   0   0   0   1   0
+              0     1   0.9952424    0     3122      111 
+              1     1   0.0011700    0     3122       22 
+              2     1   0.0033300    0     3212       22 
+              3     1   0.0002530   22      -12       11     3222 
+              4     1   0.0000046   22      -14       13     3222 
+
+    3334  Omega-           Omegabar+          4  -3   0    1.67245    0.00000    1.67245    1.67245  2.46100e+01   0   0   0   1   0
+              0     1   0.6737955    0     3122     -321 
+              1     1   0.2345365    0     3322     -211 
+              2     1   0.0854667    0     3312      111 
+              3     1   0.0006360    0     3324     -211 
+              4     1   0.0055653   22      -12       11     3322 
+
+ --------  End PYTHIA Particle Data Table  -----------------------------------------------------------------------------------------
+
+
+ --------  PYTHIA Info Listing  ---------------------------------------- 
+ 
+ Beam A: id =   2212, pz =  6.500e+03, e =  6.500e+03, m =  9.383e-01.
+ Beam B: id =   2212, pz = -6.500e+03, e =  6.500e+03, m =  9.383e-01.
+
+ In 1: id =   21, x =  5.411e-04, pdf =  9.212e+00 at Q2 =  3.991e+00.
+ In 2: id =   21, x =  3.022e-04, pdf =  1.064e+01 at same Q2.
+
+ Process non-diffractive with code 101 is 2 -> 2.
+ Subprocess g g -> g g with code 111 is 2 -> 2.
+ It has sHat =  2.764e+01,    tHat = -2.280e+01,    uHat = -4.838e+00,
+       pTHat =  1.998e+00,   m3Hat =  0.000e+00,   m4Hat =  0.000e+00,
+    thetaHat =  2.278e+00,  phiHat =  1.305e+00.
+     alphaEM =  7.537e-03,  alphaS =  2.781e-01    at Q2 =  1.077e+01.
+
+ Impact parameter b =  1.644e+00 gives enhancement factor =  3.463e-02.
+ Max pT scale for MPI =  1.998e+00, ISR =  1.998e+00, FSR =  1.998e+00.
+ Number of MPI =     2, ISR =     5, FSRproc =    13, FSRreson =     0.
+
+ --------  End PYTHIA Info Listing  ------------------------------------
+
+ --------  PYTHIA Event Listing  (hard process)  -----------------------------------------------------------------------------------
+ 
+    no         id  name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0         90  (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000  13000.000  13000.000
+     1       2212  (p+)               -12     0     0     3     0     0     0      0.000      0.000   6500.000   6500.000      0.938
+     2       2212  (p+)               -12     0     0     4     0     0     0      0.000      0.000  -6500.000   6500.000      0.938
+     3         21  (g)                -21     1     0     5     6   101   102      0.000      0.000      3.517      3.517      0.000
+     4         21  (g)                -21     2     0     5     6   103   101      0.000      0.000     -1.965      1.965      0.000
+     5         21  g                   23     3     4     0     0   103   104      1.928      0.524     -1.005      2.236      0.000
+     6         21  g                   23     3     4     0     0   104   102     -1.928     -0.524      2.557      3.245      0.000
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000      1.552      5.482      5.257
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no         id  name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0         90  (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000  13000.000  13000.000
+     1       2212  (p+)               -12     0     0    82     0     0     0      0.000      0.000   6500.000   6500.000      0.938
+     2       2212  (p+)               -12     0     0    83     0     0     0      0.000      0.000  -6500.000   6500.000      0.938
+     3         21  (g)                -21     7     0     5     6   101   102      0.000      0.000      3.517      3.517      0.000
+     4         21  (g)                -21     8     8     5     6   103   101      0.000      0.000     -1.965      1.965      0.000
+     5         21  (g)                -23     3     4     9     9   103   104      1.928      0.524     -1.005      2.236      0.000
+     6         21  (g)                -23     3     4    10    10   104   102     -1.928     -0.524      2.557      3.245      0.000
+     7         21  (g)                -41    12    12    11     3   101   105      0.000     -0.000    114.339    114.339      0.000
+     8         21  (g)                -42    13     0     4     4   103   101      0.000      0.000     -1.965      1.965      0.000
+     9         21  (g)                -44     5     5    14    14   103   104      1.798      0.219     -0.476      1.873      0.000
+    10         21  (g)                -44     6     6    15    15   104   102     -2.539     -1.963      2.510      4.074      0.000
+    11         21  (g)                -43     7     0    16    16   102   105      0.741      1.744    110.341    110.357      0.000
+    12         21  (g)                -42    33    33     7     7   101   105      0.000     -0.000    114.339    114.339      0.000
+    13         21  (g)                -41    34     0    17     8   106   101     -0.000      0.000     -2.141      2.141      0.000
+    14         21  (g)                -44     9     9    30    31   103   104      2.358     -0.250     -0.048      2.372      0.000
+    15         21  (g)                -44    10    10    20    20   104   102     -2.166     -2.275      2.254      3.866      0.000
+    16         21  (g)                -44    11    11    18    19   102   105      0.745      1.740    106.900    106.916      0.000
+    17         21  (g)                -43    13     0    38    38   106   103     -0.938      0.785      3.093      3.326      0.000
+    18         21  (g)                -51    16     0    37    37   107   105     -1.131      0.732     43.721     43.742      0.000
+    19         21  (g)                -51    16     0    39    39   102   107      1.826      0.956     63.231     63.264      0.000
+    20         21  (g)                -52    15    15    32    32   104   102     -2.116     -2.222      2.201      3.776      0.000
+    21         21  (g)                -31    25    25    23    24   109   108      0.000      0.000     99.789     99.789      0.000
+    22         21  (g)                -31    26     0    23    24   108   110      0.000      0.000     -0.083      0.083      0.000
+    23         21  (g)                -33    21    22    27    27   111   110     -0.335      1.206      4.902      5.059      0.000
+    24         21  (g)                -33    21    22    28    28   109   111      0.335     -1.206     94.804     94.813      0.000
+    25         21  (g)                -42    75     0    21    21   109   108      0.000     -0.000     99.789     99.789      0.000
+    26         21  (g)                -41    76    76    29    22   108   112     -0.000      0.000     -0.118      0.118      0.000
+    27         21  (g)                -44    23    23    56    56   111   110      0.501      1.002      3.490      3.665      0.000
+    28         21  (g)                -44    24    24    78    78   109   111      0.379     -1.217     88.170     88.179      0.000
+    29         21  (g)                -43    26     0    54    55   110   112     -0.879      0.215      8.012      8.063      0.000
+    30         21  (g)                -51    14     0    35    35   103   113      1.337      0.298     -0.688      1.533      0.000
+    31         21  (g)                -51    14     0    40    40   113   104      0.610     -0.980      1.068      1.573      0.000
+    32         21  (g)                -52    20    20    36    36   104   102     -1.705     -1.790      1.773      3.042      0.000
+    33         21  (g)                -42    82    82    12    12   101   105     -0.000     -0.000    114.339    114.339      0.000
+    34          1  (d)                -41    53    53    41    13   106     0      0.000      0.000  -1569.727   1569.727      0.000
+    35         21  (g)                -44    30    30    44    44   103   113      1.026     -0.011     -0.875      1.348      0.000
+    36         21  (g)                -44    32    32    47    47   104   102     -1.882     -1.967      2.284      3.554      0.000
+    37         21  (g)                -44    18    18    59    59   107   105     -1.134      0.729     43.746     43.767      0.000
+    38         21  (g)                -44    17    17    42    43   106   103     -0.970      0.752      3.117      3.350      0.000
+    39         21  (g)                -44    19    19    45    46   102   107      1.821      0.951     62.796     62.830      0.000
+    40         21  (g)                -44    31    31    69    70   113   104      0.539     -1.050      1.128      1.633      0.000
+    41          1  (d)                -43    34     0    90    90   101     0      0.600      0.596  -1567.584   1567.585      0.330
+    42         21  (g)                -51    38     0    51    52   106   114     -0.797     -0.122      2.396      2.528      0.000
+    43         21  (g)                -51    38     0    63    64   114   103     -0.003      0.872      0.576      1.045      0.000
+    44         21  (g)                -52    35    35    65    65   103   113      0.856     -0.009     -0.730      1.125      0.000
+    45         21  (g)                -51    39     0    57    58   115   107      0.875      1.262     48.747     48.771      0.000
+    46         21  (g)                -51    39     0    48    49   102   115      0.910     -0.348     14.093     14.127      0.000
+    47         21  (g)                -52    36    36    50    50   104   102     -1.846     -1.929      2.240      3.486      0.000
+    48         21  (g)                -51    46     0    68    68   116   115      0.318      0.194     11.806     11.811      0.000
+    49         21  (g)                -51    46     0    66    67   102   116      0.432     -0.709      2.481      2.616      0.000
+    50         21  (g)                -52    47    47    74    74   104   102     -1.687     -1.763      2.047      3.185      0.000
+    51         21  (g)                -51    42     0    60    61   117   114     -1.015      0.498      1.882      2.196      0.000
+    52         21  (g)                -51    42     0    62    62   106   117      0.218     -0.620      0.169      0.678      0.000
+    53          1  (d)                -53    83    83    34    34   106     0      0.000      0.000  -1570.072   1570.072      0.000
+    54         21  (g)                -51    29     0    79    79   118   112      0.284     -0.215      1.478      1.520      0.000
+    55         21  (g)                -51    29     0    80    80   110   118     -0.895      0.968      8.406      8.509      0.000
+    56         21  (g)                -52    27    27    77    77   111   110      0.232      0.464      1.617      1.699      0.000
+    57         21  (g)                -51    45     0    88    88   115   119     -0.016      0.132      0.537      0.554      0.000
+    58         21  (g)                -51    45     0    95    95   119   107      0.408      1.441     66.896     66.912      0.000
+    59         21  (g)                -52    37    37    86    86   107   105     -0.650      0.418     25.060     25.072      0.000
+    60         -1  (dbar)             -51    51     0    87    87     0   114     -0.335      0.304      1.733      1.821      0.330
+    61          1  (d)                -51    51     0    96    96   117     0     -0.572     -0.112      0.233      0.709      0.330
+    62         21  (g)                -52    52    52    94    94   106   117      0.110     -0.314      0.085      0.343      0.000
+    63         21  (g)                -51    43     0    91    91   114   120      0.068     -0.240     -0.204      0.322      0.000
+    64         21  (g)                -51    43     0    97    97   120   103      0.320      1.108      0.447      1.237      0.000
+    65         21  (g)                -52    44    44    71    71   103   113      0.465     -0.005     -0.397      0.612      0.000
+    66         21  (g)                -51    49     0    72    73   102   121      0.523     -0.965      6.011      6.111      0.000
+    67         21  (g)                -51    49     0    98    98   121   116      0.045      0.339      1.501      1.539      0.000
+    68         21  (g)                -52    48    48    92    92   116   115      0.182      0.112      6.774      6.778      0.000
+    69         21  (g)                -51    40     0    89    89   122   104      0.490     -0.983      0.146      1.108      0.000
+    70         21  (g)                -51    40     0    99    99   113   122      0.285     -0.070      0.781      0.834      0.000
+    71         21  (g)                -52    65    65    84    84   103   113      0.230     -0.003     -0.196      0.302      0.000
+    72         21  (g)                -51    66     0    93    93   123   121      0.409     -1.270      4.537      4.729      0.000
+    73         21  (g)                -51    66     0   100   100   102   123     -0.035      0.150      1.654      1.661      0.000
+    74         21  (g)                -52    50    50    85    85   104   102     -1.539     -1.608      1.867      2.905      0.000
+    75         21  (g)                -41   101   101    81    25   109   124      0.000      0.000   3508.471   3508.471      0.000
+    76         21  (g)                -42   102   102    26    26   108   112      0.000      0.000     -0.118      0.118      0.000
+    77         21  (g)                -44    56    56   103   103   111   110      0.233      0.473      1.625      1.708      0.000
+    78         21  (g)                -44    28    28   104   104   109   111      0.405     -0.778     88.651     88.656      0.000
+    79         21  (g)                -44    54    54   105   105   118   112      0.285     -0.208      1.486      1.528      0.000
+    80         21  (g)                -44    55    55   106   106   110   118     -0.892      1.010      8.450      8.557      0.000
+    81         21  (g)                -43    75     0   107   107   108   124     -0.030     -0.497   3408.140   3408.140      0.000
+    82         21  (g)                -61     1     0    33    33   109   105      0.497     -0.513    114.338    114.341      0.000
+    83          1  (d)                -61     2     0    53    53   106     0      1.099     -1.231  -1570.077   1570.078      0.000
+    84         21  (g)                -62    71    71   141   141   103   113      0.230     -0.003     -0.197      0.303      0.000
+    85         21  (g)                -62    74    74   138   138   104   110     -1.528     -1.619      1.867      2.905      0.000
+    86         21  (g)                -62    59    59   131   131   107   108     -0.541      0.305     25.062     25.070      0.000
+    87         -1  (dbar)             -62    60    60   144   144     0   114     -0.327      0.296      1.734      1.820      0.330
+    88         21  (g)                -62    57    57   111     0   115   119     -0.014      0.130      0.538      0.553      0.000
+    89         21  (g)                -62    69    69   139   139   122   104      0.493     -0.986      0.143      1.111      0.000
+    90          1  (d)                -62    41    41   168   168   101     0      1.698     -0.633  -1567.589   1567.590      0.330
+    91         21  (g)                -62    63    63   143   143   114   120      0.068     -0.240     -0.205      0.323      0.000
+    92         21  (g)                -62    68    68   134   134   116   111      0.212      0.081      6.774      6.778      0.000
+    93         21  (g)                -62    72    72   136   136   123   121      0.430     -1.291      4.534      4.734      0.000
+    94         21  (g)                -62    62    62   114     0   106   117      0.111     -0.315      0.085      0.344      0.000
+    95         21  (g)                -62    58    58   132   132   119   107      0.699      1.140     66.897     66.910      0.000
+    96          1  (d)                -62    61    61   114     0   117     0     -0.570     -0.115      0.233      0.708      0.330
+    97         21  (g)                -62    64    64   142   142   120   103      0.324      1.104      0.448      1.234      0.000
+    98         21  (g)                -62    67    67   135   135   121   116      0.052      0.332      1.501      1.539      0.000
+    99         21  (g)                -62    70    70   112     0   113   118      0.288     -0.074      0.780      0.835      0.000
+   100         21  (g)                -62    73    73   113     0   102   123     -0.028      0.143      1.654      1.661      0.000
+   101         21  (g)                -61     1     0    75    75   112   112      0.446      0.125   3507.277   3507.277      0.000
+   102         21  (g)                -61     2     0    76    76   124   124     -0.748      0.483      1.564      1.799      0.000
+   103         21  (g)                -62    77    77   111     0   111   115     -0.031      0.643      2.449      2.532      0.000
+   104         21  (g)                -62    78    78   169   169   109   101      0.402     -0.766     85.774     85.778      0.000
+   105         21  (g)                -62    79    79   112     0   118   122      0.154     -0.123      0.451      0.492      0.000
+   106         21  (g)                -62    80    80   113     0   110   102     -1.230      1.229     14.111     14.218      0.000
+   107         21  (g)                -62    81    81   130   130   108   105      0.404     -0.376   3406.056   3406.056      0.000
+   108       2101  (ud_0)             -63     1     0   170   170     0   109     -0.250      0.150    643.980    643.980      0.579
+   109          2  (u)                -63     1     0   129   129   105     0     -0.694      0.239   2232.721   2232.721      0.330
+   110       2203  (uu_1)             -63     2     0   116   116     0   106     -0.352      0.748  -4929.803   4929.804      0.771
+   111         21  (g)                -73    88   103   133   133   111   119     -0.045      0.773      2.987      3.086      0.028
+   112         21  (g)                -73    99   105   140   140   113   122      0.442     -0.197      1.232      1.328      0.106
+   113         21  (g)                -73   100   106   137   137   110   123     -1.257      1.372     15.766     15.879      0.340
+   114          1  (d)                -73    96    94   115   115   106     0     -0.459     -0.429      0.318      1.052      0.782
+   115          1  (d)                -71   114   114   117   128   106     0     -0.459     -0.429      0.318      1.052      0.782
+   116       2203  (uu_1)             -71   110   110   117   128     0   106     -0.352      0.748  -4929.803   4929.804      0.771
+   117        111  (pi0)              -83   115   116   229   230     0     0     -0.301     -0.032      0.060      0.337      0.135
+   118        311  (K0)               -83   115   116   190   190     0     0      0.225     -0.167     -0.374      0.683      0.498
+   119       -313  (K*bar0)           -83   115   116   191   192     0     0     -0.291     -0.231     -1.404      1.703      0.889
+   120       -211  pi-                 83   115   116     0     0     0     0      0.011     -0.276     -0.038      0.312      0.140
+   121       2212  p+                  83   115   116     0     0     0     0      0.014      0.481     -9.918      9.974      0.938
+   122      -2112  nbar0               84   115   116     0     0     0     0     -0.343     -0.039    -20.019     20.044      0.940
+   123       -213  (rho-)             -84   115   116   193   194     0     0      0.004     -0.348    -81.257     81.266      1.153
+   124        323  (K*+)              -84   115   116   195   196     0     0      0.514      0.107   -239.144    239.146      0.861
+   125       -311  (Kbar0)            -84   115   116   197   197     0     0     -0.390      0.231   -366.837    366.838      0.498
+   126       -211  pi-                 84   115   116     0     0     0     0     -0.124      0.159   -847.302    847.302      0.140
+   127       2224  (Delta++)          -84   115   116   198   199     0     0     -0.218     -0.021  -1011.100   1011.101      1.198
+   128        113  (rho0)             -84   115   116   200   201     0     0      0.090      0.455  -2352.152   2352.152      0.761
+   129          2  (u)                -71   109   109   145   167   105     0     -0.694      0.239   2232.721   2232.721      0.330
+   130         21  (g)                -71   107   107   145   167   108   105      0.404     -0.376   3406.056   3406.056      0.000
+   131         21  (g)                -71    86    86   145   167   107   108     -0.541      0.305     25.062     25.070      0.000
+   132         21  (g)                -71    95    95   145   167   119   107      0.699      1.140     66.897     66.910      0.000
+   133         21  (g)                -71   111   111   145   167   111   119     -0.045      0.773      2.987      3.086      0.028
+   134         21  (g)                -71    92    92   145   167   116   111      0.212      0.081      6.774      6.778      0.000
+   135         21  (g)                -71    98    98   145   167   121   116      0.052      0.332      1.501      1.539      0.000
+   136         21  (g)                -71    93    93   145   167   123   121      0.430     -1.291      4.534      4.734      0.000
+   137         21  (g)                -71   113   113   145   167   110   123     -1.257      1.372     15.766     15.879      0.340
+   138         21  (g)                -71    85    85   145   167   104   110     -1.528     -1.619      1.867      2.905      0.000
+   139         21  (g)                -71    89    89   145   167   122   104      0.493     -0.986      0.143      1.111      0.000
+   140         21  (g)                -71   112   112   145   167   113   122      0.442     -0.197      1.232      1.328      0.106
+   141         21  (g)                -71    84    84   145   167   103   113      0.230     -0.003     -0.197      0.303      0.000
+   142         21  (g)                -71    97    97   145   167   120   103      0.324      1.104      0.448      1.234      0.000
+   143         21  (g)                -71    91    91   145   167   114   120      0.068     -0.240     -0.205      0.323      0.000
+   144         -1  (dbar)             -71    87    87   145   167     0   114     -0.327      0.296      1.734      1.820      0.330
+   145        213  (rho+)             -83   129   144   202   203     0     0      0.500      0.280   1722.329   1722.330      0.779
+   146        111  (pi0)              -83   129   144   231   232     0     0     -0.820     -0.407   2228.310   2228.310      0.135
+   147       3112  Sigma-              83   129   144     0     0     0     0     -0.151      0.473   1081.201   1081.202      1.197
+   148      -3112  Sigmabar+           83   129   144     0     0     0     0      0.067     -0.141    265.167    265.170      1.197
+   149       -211  pi-                 83   129   144     0     0     0     0     -0.601     -0.059     88.879     88.881      0.140
+   150        223  (omega)            -83   129   144   233   235     0     0      0.546      0.715    257.684    257.686      0.788
+   151        211  pi+                 83   129   144     0     0     0     0      0.232     -0.476     27.527     27.533      0.140
+   152       2214  (Delta+)           -83   129   144   204   205     0     0     -0.341      0.707     43.926     43.951      1.271
+   153      -2224  (Deltabar--)       -83   129   144   206   207     0     0      0.302      0.212      8.255      8.361      1.280
+   154        213  (rho+)             -83   129   144   208   209     0     0      0.350      0.076     14.293     14.317      0.744
+   155        111  (pi0)              -83   129   144   236   237     0     0      0.070      0.556      1.443      1.554      0.135
+   156       -211  pi-                 83   129   144     0     0     0     0      0.106     -0.815      7.192      7.240      0.140
+   157        113  (rho0)             -84   129   144   210   211     0     0     -0.959      1.097     10.905     11.029      0.776
+   158        211  pi+                 84   129   144     0     0     0     0      0.434      0.028      3.626      3.654      0.140
+   159       -213  (rho-)             -84   129   144   212   213     0     0     -1.139     -0.864      2.023      2.609      0.819
+   160        111  (pi0)              -84   129   144   238   239     0     0     -0.086     -0.194      0.475      0.538      0.135
+   161        111  (pi0)              -84   129   144   240   241     0     0      0.225      0.036     -0.112      0.288      0.135
+   162        113  (rho0)             -84   129   144   214   215     0     0      0.108     -0.616      0.888      1.347      0.796
+   163        111  (pi0)              -84   129   144   242   243     0     0     -0.262     -0.039      0.417      0.512      0.135
+   164        111  (pi0)              -84   129   144   244   245     0     0     -0.164     -0.168      0.232      0.357      0.135
+   165       3222  Sigma+              84   129   144     0     0     0     0      0.891      0.168      0.222      1.512      1.189
+   166        111  (pi0)              -84   129   144   246   247     0     0     -0.481     -0.114      1.469      1.555      0.135
+   167      -3214  (Sigma*bar0)       -84   129   144   216   217     0     0      0.134      0.475      0.972      1.861      1.509
+   168          1  (d)                -71    90    90   171   189   101     0      1.698     -0.633  -1567.589   1567.590      0.330
+   169         21  (g)                -71   104   104   171   189   109   101      0.402     -0.766     85.774     85.778      0.000
+   170       2101  (ud_0)             -71   108   108   171   189     0   109     -0.250      0.150    643.980    643.980      0.579
+   171        311  (K0)               -83   168   170   218   218     0     0      1.705     -0.503  -1300.302   1300.304      0.498
+   172       -311  (Kbar0)            -83   168   170   219   219     0     0     -0.095     -0.018   -139.472    139.473      0.498
+   173       -213  (rho-)             -83   168   170   220   221     0     0     -0.284      0.133    -65.405     65.410      0.789
+   174        113  (rho0)             -83   168   170   222   223     0     0      0.434      0.126    -40.721     40.731      0.742
+   175        111  (pi0)              -83   168   170   248   249     0     0      0.039     -0.277     -3.359      3.373      0.135
+   176        111  (pi0)              -83   168   170   250   251     0     0      0.078      0.435     -1.099      1.192      0.135
+   177        221  (eta)              -83   168   170   252   253     0     0     -0.273     -0.260     -6.452      6.486      0.548
+   178        211  pi+                 83   168   170     0     0     0     0      0.138     -0.055     -0.248      0.321      0.140
+   179        313  (K*0)              -83   168   170   224   225     0     0      0.011     -0.339     -6.026      6.100      0.887
+   180       3322  Xi0                 83   168   170     0     0     0     0      0.008      0.121     -3.002      3.279      1.315
+   181      -3222  Sigmabar-           84   168   170     0     0     0     0     -0.056      0.012     -0.408      1.259      1.189
+   182        223  (omega)            -84   168   170   254   256     0     0     -0.132      0.338      1.564      1.785      0.780
+   183        331  (eta')             -84   168   170   257   258     0     0      0.362     -0.665      2.591      2.864      0.957
+   184        211  pi+                 84   168   170     0     0     0     0     -0.631      0.183      1.175      1.353      0.140
+   185        111  (pi0)              -84   168   170   259   260     0     0      0.332     -0.043      1.423      1.468      0.135
+   186       3122  Lambda0             84   168   170     0     0     0     0      0.464     -0.071     38.251     38.270      1.116
+   187      -3322  Xibar0              84   168   170     0     0     0     0     -0.412      0.371     46.108     46.130      1.315
+   188       -311  (Kbar0)            -84   168   170   226   226     0     0      0.144     -0.373     95.657     95.659      0.498
+   189       2112  n0                  84   168   170     0     0     0     0      0.021     -0.363    541.889    541.890      0.940
+   190        310  K_S0                91   118   118     0     0     0     0      0.225     -0.167     -0.374      0.683      0.498
+   191       -321  K-                  91   119     0     0     0     0     0     -0.291     -0.047     -0.476      0.747      0.494
+   192        211  pi+                 91   119     0     0     0     0     0      0.000     -0.184     -0.928      0.956      0.140
+   193       -211  pi-                 91   123     0     0     0     0     0     -0.110     -0.126    -76.576     76.576      0.140
+   194        111  (pi0)              -91   123     0   261   262     0     0      0.114     -0.223     -4.681      4.690      0.135
+   195        311  (K0)               -91   124     0   227   227     0     0      0.472     -0.054   -216.366    216.367      0.498
+   196        211  pi+                 91   124     0     0     0     0     0      0.041      0.160    -22.778     22.779      0.140
+   197        130  K_L0                91   125   125     0     0     0     0     -0.390      0.231   -366.837    366.838      0.498
+   198       2212  p+                  91   127     0     0     0     0     0     -0.257     -0.130   -936.268    936.269      0.938
+   199        211  pi+                 91   127     0     0     0     0     0      0.038      0.109    -74.832     74.832      0.140
+   200        211  pi+                 91   128     0     0     0     0     0      0.266      0.559  -1541.585   1541.585      0.140
+   201       -211  pi-                 91   128     0     0     0     0     0     -0.177     -0.104   -810.567    810.567      0.140
+   202        211  pi+                 91   145     0     0     0     0     0     -0.026      0.384    818.166    818.166      0.140
+   203        111  (pi0)              -91   145     0   263   264     0     0      0.525     -0.105    904.163    904.163      0.135
+   204       2112  n0                  91   152     0     0     0     0     0     -0.513      0.606     33.550     33.572      0.940
+   205        211  pi+                 91   152     0     0     0     0     0      0.172      0.101     10.376     10.379      0.140
+   206      -2212  pbar-               91   153     0     0     0     0     0      0.339      0.335      5.471      5.572      0.938
+   207       -211  pi-                 91   153     0     0     0     0     0     -0.037     -0.123      2.783      2.790      0.140
+   208        211  pi+                 91   154     0     0     0     0     0      0.516     -0.097      8.529      8.546      0.140
+   209        111  (pi0)              -91   154     0   265   266     0     0     -0.166      0.173      5.765      5.771      0.135
+   210        211  pi+                 91   157     0     0     0     0     0     -0.228     -0.028      2.795      2.808      0.140
+   211       -211  pi-                 91   157     0     0     0     0     0     -0.731      1.125      8.110      8.221      0.140
+   212       -211  pi-                 91   159     0     0     0     0     0     -0.228     -0.301      0.118      0.420      0.140
+   213        111  (pi0)              -91   159     0   267   268     0     0     -0.910     -0.563      1.904      2.189      0.135
+   214        211  pi+                 91   162     0     0     0     0     0      0.117     -0.770      0.604      0.995      0.140
+   215       -211  pi-                 91   162     0     0     0     0     0     -0.009      0.153      0.284      0.352      0.140
+   216      -3122  Lambdabar0          91   167     0     0     0     0     0     -0.188      0.348      0.568      1.313      1.116
+   217        111  (pi0)              -91   167     0   269   270     0     0      0.321      0.127      0.404      0.548      0.135
+   218        310  K_S0                91   171   171     0     0     0     0      1.705     -0.503  -1300.302   1300.304      0.498
+   219        130  K_L0                91   172   172     0     0     0     0     -0.095     -0.018   -139.472    139.473      0.498
+   220       -211  pi-                 91   173     0     0     0     0     0     -0.200      0.439    -40.496     40.499      0.140
+   221        111  (pi0)              -91   173     0   271   272     0     0     -0.085     -0.307    -24.909     24.911      0.135
+   222        211  pi+                 91   174     0     0     0     0     0     -0.153     -0.076    -13.595     13.597      0.140
+   223       -211  pi-                 91   174     0     0     0     0     0      0.587      0.202    -27.126     27.134      0.140
+   224        311  (K0)               -91   179     0   228   228     0     0     -0.222     -0.061     -4.033      4.070      0.498
+   225        111  (pi0)              -91   179     0   273   274     0     0      0.233     -0.279     -1.993      2.030      0.135
+   226        310  K_S0                91   188   188     0     0     0     0      0.144     -0.373     95.657     95.659      0.498
+   227        310  K_S0                91   195   195     0     0     0     0      0.472     -0.054   -216.366    216.367      0.498
+   228        130  K_L0                91   224   224     0     0     0     0     -0.222     -0.061     -4.033      4.070      0.498
+   229         22  gamma               91   117     0     0     0     0     0     -0.264     -0.055      0.009      0.270      0.000
+   230         22  gamma               91   117     0     0     0     0     0     -0.037      0.023      0.051      0.067      0.000
+   231         22  gamma               91   146     0     0     0     0     0     -0.051     -0.027     79.467     79.467      0.000
+   232         22  gamma               91   146     0     0     0     0     0     -0.769     -0.380   2148.843   2148.843      0.000
+   233        211  pi+                 91   150     0     0     0     0     0      0.030      0.132     14.495     14.496      0.140
+   234       -211  pi-                 91   150     0     0     0     0     0      0.098      0.194     78.514     78.515      0.140
+   235        111  (pi0)              -91   150     0   275   276     0     0      0.417      0.389    164.675    164.676      0.135
+   236         22  gamma               91   155     0     0     0     0     0      0.110      0.395      1.057      1.134      0.000
+   237         22  gamma               91   155     0     0     0     0     0     -0.040      0.161      0.386      0.420      0.000
+   238         22  gamma               91   160     0     0     0     0     0     -0.019     -0.070      0.046      0.086      0.000
+   239         22  gamma               91   160     0     0     0     0     0     -0.067     -0.124      0.429      0.451      0.000
+   240         22  gamma               91   161     0     0     0     0     0      0.043     -0.020     -0.082      0.094      0.000
+   241         22  gamma               91   161     0     0     0     0     0      0.183      0.056     -0.030      0.193      0.000
+   242         22  gamma               91   163     0     0     0     0     0     -0.019      0.019      0.001      0.026      0.000
+   243         22  gamma               91   163     0     0     0     0     0     -0.244     -0.058      0.416      0.486      0.000
+   244         22  gamma               91   164     0     0     0     0     0     -0.170     -0.154      0.246      0.336      0.000
+   245         22  gamma               91   164     0     0     0     0     0      0.006     -0.014     -0.014      0.021      0.000
+   246         22  gamma               91   166     0     0     0     0     0     -0.283     -0.101      0.702      0.763      0.000
+   247         22  gamma               91   166     0     0     0     0     0     -0.198     -0.013      0.767      0.792      0.000
+   248         22  gamma               91   175     0     0     0     0     0     -0.046     -0.052     -0.836      0.839      0.000
+   249         22  gamma               91   175     0     0     0     0     0      0.085     -0.225     -2.522      2.534      0.000
+   250         22  gamma               91   176     0     0     0     0     0      0.044      0.425     -0.999      1.087      0.000
+   251         22  gamma               91   176     0     0     0     0     0      0.033      0.011     -0.100      0.106      0.000
+   252         22  gamma               91   177     0     0     0     0     0     -0.221      0.069     -1.115      1.139      0.000
+   253         22  gamma               91   177     0     0     0     0     0     -0.052     -0.329     -5.337      5.347      0.000
+   254        211  pi+                 91   182     0     0     0     0     0      0.007      0.292      0.422      0.532      0.140
+   255       -211  pi-                 91   182     0     0     0     0     0     -0.257     -0.002      0.450      0.537      0.140
+   256        111  (pi0)              -91   182     0   277   278     0     0      0.118      0.047      0.692      0.716      0.135
+   257        113  (rho0)             -91   183     0   279   280     0     0      0.493     -0.501      2.155      2.380      0.725
+   258         22  gamma               91   183     0     0     0     0     0     -0.132     -0.164      0.436      0.484      0.000
+   259         22  gamma               91   185     0     0     0     0     0      0.116      0.042      0.622      0.634      0.000
+   260         22  gamma               91   185     0     0     0     0     0      0.216     -0.085      0.802      0.834      0.000
+   261         22  gamma               91   194     0     0     0     0     0     -0.019     -0.085     -1.953      1.955      0.000
+   262         22  gamma               91   194     0     0     0     0     0      0.133     -0.137     -2.728      2.734      0.000
+   263         22  gamma               91   203     0     0     0     0     0      0.389     -0.017    660.776    660.776      0.000
+   264         22  gamma               91   203     0     0     0     0     0      0.137     -0.088    243.387    243.387      0.000
+   265         22  gamma               91   209     0     0     0     0     0     -0.126      0.075      4.401      4.403      0.000
+   266         22  gamma               91   209     0     0     0     0     0     -0.039      0.098      1.364      1.368      0.000
+   267         22  gamma               91   213     0     0     0     0     0     -0.565     -0.279      1.171      1.330      0.000
+   268         22  gamma               91   213     0     0     0     0     0     -0.345     -0.284      0.733      0.859      0.000
+   269         22  gamma               91   217     0     0     0     0     0      0.165     -0.003      0.212      0.269      0.000
+   270         22  gamma               91   217     0     0     0     0     0      0.157      0.130      0.192      0.280      0.000
+   271         22  gamma               91   221     0     0     0     0     0      0.014     -0.163    -14.736     14.737      0.000
+   272         22  gamma               91   221     0     0     0     0     0     -0.098     -0.143    -10.172     10.174      0.000
+   273         22  gamma               91   225     0     0     0     0     0      0.015     -0.050     -0.588      0.590      0.000
+   274         22  gamma               91   225     0     0     0     0     0      0.218     -0.228     -1.406      1.441      0.000
+   275         22  gamma               91   235     0     0     0     0     0      0.022      0.071     28.739     28.739      0.000
+   276         22  gamma               91   235     0     0     0     0     0      0.396      0.318    135.935    135.936      0.000
+   277         22  gamma               91   256     0     0     0     0     0      0.007      0.060      0.127      0.141      0.000
+   278         22  gamma               91   256     0     0     0     0     0      0.111     -0.013      0.564      0.575      0.000
+   279        211  pi+                 91   257     0     0     0     0     0      0.156      0.154      0.558      0.615      0.140
+   280       -211  pi-                 91   257     0     0     0     0     0      0.337     -0.655      1.597      1.765      0.140
+                                   Charge sum:  2.000           Momentum sum:     -0.000      0.000     -0.000  13000.000  13000.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+#                         FastJet release 3.3.4
+#                 M. Cacciari, G.P. Salam and G. Soyez                  
+#     A software package for jet finding and analysis at colliders      
+#                           http://fastjet.fr                           
+#	                                                                      
+# Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package
+# for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   
+#                                                                       
+# FastJet is provided without warranty under the GNU GPL v2 or higher.  
+# It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code
+# and 3rd party plugin jet algorithms. See COPYING file for details.
+#--------------------------------------------------------------------------
+ PYTHIA Error in StringFragmentation::fragment: stuck in joining  
+ PYTHIA Error in Pythia::next: hadronLevel failed; try again  
+ PYTHIA Warning in SimpleSpaceShower::pT2nextQCD: weight above unity  
+ PYTHIA Warning in StringFragmentation::fragmentToJunction: bad convergence junction rest frame  
+ PYTHIA Error in BeamRemnants::setKinematics: kinematics construction failed  
+
+ *-------  PYTHIA Event and Cross Section Statistics  -------------------------------------------------------------*
+ |                                                                                                                 |
+ | Subprocess                                    Code |            Number of events       |      sigma +- delta    |
+ |                                                    |       Tried   Selected   Accepted |     (estimated) (mb)   |
+ |                                                    |                                   |                        |
+ |-----------------------------------------------------------------------------------------------------------------|
+ |                                                    |                                   |                        |
+ | non-diffractive                                101 |         722        722        722 |   5.642e+01  0.000e+00 |
+ | A B -> X B single diffractive                  103 |          96         96         96 |   6.416e+00  2.276e-08 |
+ | A B -> A X single diffractive                  104 |          76         76         76 |   6.416e+00  0.000e+00 |
+ | A B -> X X double diffractive                  105 |         100        100        100 |   8.798e+00  7.251e-08 |
+ | g g -> g g                                     111 |          15          5          5 |   3.637e-01  8.578e-02 |
+ | g g -> q qbar (uds)                            112 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> q g                                     113 |          14          1          1 |   1.223e-01  1.223e-01 |
+ | q q(bar)' -> q q(bar)'                         114 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar -> g g                                  115 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar -> q' qbar' (uds)                       116 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | g g -> c cbar                                  121 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar -> c cbar                               122 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | g g -> b bbar                                  123 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar -> b bbar                               124 |           0          0          0 |   0.000e+00  0.000e+00 |
+ |                                                    |                                   |                        |
+ | sum                                                |        1023       1000       1000 |   7.853e+01  1.494e-01 |
+ |                                                                                                                 |
+ *-------  End PYTHIA Event and Cross Section Statistics ----------------------------------------------------------*
+
+ *-------  PYTHIA Error and Warning Messages Statistics  ----------------------------------------------------------* 
+ |                                                                                                                 | 
+ |  times   message                                                                                                | 
+ |                                                                                                                 | 
+ |      2   Error in BeamRemnants::setKinematics: kinematics construction failed                                   | 
+ |      1   Error in Pythia::next: hadronLevel failed; try again                                                   | 
+ |      1   Error in StringFragmentation::fragment: stuck in joining                                               | 
+ |      1   Warning from Pythia::init: should not combine softQCD processes with hard ones                         | 
+ |      3   Warning in MultipartonInteractions::init: maximum increased                                            | 
+ |      6   Warning in SimpleSpaceShower::pT2nextQCD: weight above unity                                           | 
+ |      2   Warning in StringFragmentation::fragmentToJunction: bad convergence junction rest frame                | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Error and Warning Messages Statistics  ------------------------------------------------------* 
