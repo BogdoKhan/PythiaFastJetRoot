@@ -28,6 +28,13 @@ Add soft bin code:
 Add canvas with comparison of obtained results - Done!
 -----------------------------------------------------------
 Fix errors:
-- Fill X axis by jet pT data in angular difference loop -
+- Fill X axis by jet pT data in angular difference loop - Done;
 - Make a function that calculates angles properly in 0..2pi region - Done! (RecalcAngle function)
-IDEA: make .h file with a set of defined functions
+IDEA: make .h file with a set of defined functions - Done;
+- Put source files in separate folders for different purposes - Done;
+--------------------------------------------------------------
+- Add kT clustering sequence code in script - Done;
+- Add code that subtracts underlying events from anti-kT-calculated results for pT - Done;
+- Add code that compares pT histograms for kT, anti-kT and corrected anti-kT sequences - Processing...
+- Recalculate angular difference - Processing...
+- Create an executable that contains the comparison for both soft (min bias) and hard bins simulation results - Done;

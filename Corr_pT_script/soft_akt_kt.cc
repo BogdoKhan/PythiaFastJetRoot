@@ -24,6 +24,7 @@
 #include "TFile.h"
 #include "TClonesArray.h"
 #include "TFile.h"
+#include "TProfile.h"
 #include "TList.h"
 #include "TVector3.h"
 #include "TMath.h"
@@ -38,39 +39,13 @@
 #include <ctime>
 
 #include <sys/stat.h>
-
-const double pi = TMath::Pi();
+#include "aux_func.h"
 
 using namespace Pythia8;
 
-Double_t RecalcAngle(const double& _angle){
-	Double_t angle = (Double_t) _angle;
-	if (angle >= 0 && angle < 2*pi){
-		return angle;
-	}
-	while (angle >= 2*pi) {
-		angle -= 2*pi;
-	}
-	while (angle < 0) {
-		angle += 2*pi;
-	}
-	return angle;
-}
-
-void MakeDir(const string& dirpath, const string& dirname){
-	string path = dirpath + dirname;
-	const char* folder = path.c_str();
-	//folder = "./Results";
-	struct stat sb;
-
-	if (stat(folder, &sb) != 0 && !S_ISDIR(sb.st_mode)) {
-		mkdir(folder, 0755);
-	} 
-}
-
 //___________________________________________________________________
 
-int main(int argc, char* argv[]) {
+int soft(int argc, vector<string> argv) {
    //at the moment the macro expects 2 arguments   : random seed   and jet radius
 
 
@@ -81,11 +56,11 @@ int main(int argc, char* argv[]) {
       cout<<"Usage:"<<endl<<"./pygen <Seed> <jetR>"<<endl;    //just testing whether the number of arguments is correct
       return 0;
    }
-   seed   = atoi(argv[1]);    // initialization of the random seed from the first argument
+   seed   = stoi(argv[1]);    // initialization of the random seed from the first argument
    //__________________________________________________________________________
    //                        ANALYSIS SETTINGS
 
-   Double_t jetParameterR   = (Double_t) atof(argv[2]); //initialization of jet cone radius from the second argument
+   Double_t jetParameterR   = (Double_t) stof(argv[2]); //initialization of jet cone radius from the second argument
    Double_t trackEtaCut     = 0.9; //psedorapidity  cut on accepted tracks
                                    //try look yourself what pseudorapidity means
 				   //roughly speaking it is rapidity for massless particles
@@ -103,7 +78,7 @@ int main(int argc, char* argv[]) {
    // Generator. Process selection. LHC initialization. Histogram.
    Pythia pythia;
    //COLLISION SYSTEM  what are you going to collide  = two protons with center of mass energy 13 TeV 
-   pythia.readString("Beams:idA = 2212"); //beam 1 gamma    2212  is  proton PDG code  (you can try to google out what are PDG codes of other particles, e.g.  photon)
+   pythia.readString("Beams:idA = 2212"); //beam 1 2212  is  proton PDG code  (you can try to google out what are PDG codes of other particles, e.g.  photon)
    pythia.readString("Beams:idB = 2212"); //beam 2 p
 
    //CENTER OF MASS ENERGY of collision 
@@ -122,13 +97,13 @@ int main(int argc, char* argv[]) {
    pythia.readString(Form("Random:seed = %d",seed));
 
    //QCD PROCESSES THAT WILL BE INCLUDED
-   pythia.readString("HardQCD:all = on");             //for hard bin configuration -ie you generate events with certain cutoff on energy that was exchanged 
-   //pythia.readString("SoftQCD:inelastic = on");     //for minimum bias configuration -ie you generate any event
+   //pythia.readString("HardQCD:all = on");             //for hard bin configuration -ie you generate events with certain cutoff on energy that was exchanged 
+   pythia.readString("SoftQCD:inelastic = on");     //for minimum bias configuration -ie you generate any event
 
    //SKIP PROCESSES WITH Q2 < 5 GeV/c  
-   pythia.readString("PhaseSpace:pTHatMin = 20."); // <<<<<<<<<<<<<<<<<<<<<<< this is the minimum cutoff.    the mimimum cutoff allowed by pythia is 3 
-   pythia.readString("PhaseSpace:pTHatMax = 50."); // <<<<<<<<<<<<<<<<<<<<<<< this is the maxium cutoff  at the moment commented out
-
+   //pythia.readString("PhaseSpace:pTHatMin = 10."); // <<<<<<<<<<<<<<<<<<<<<<< this is the minimum cutoff.    the mimimum cutoff allowed by pythia is 3 
+   //pythia.readString("PhaseSpace:pTHatMax = 50."); // <<<<<<<<<<<<<<<<<<<<<<< this is the maxium cutoff  
+	
    //SWITCH OFF DECAYS TO SECONDARY PARTICLES which would decay via weak interaction
    pythia.readString("310:mayDecay  = off"); //K0s
    pythia.readString("3122:mayDecay = off"); //labda0
@@ -140,7 +115,7 @@ int main(int argc, char* argv[]) {
    pythia.readString("3334:mayDecay = off"); //omega-
 
 
-
+	
    pythia.init();
  
    //___________________________________________________ 
@@ -151,10 +126,15 @@ int main(int argc, char* argv[]) {
    //PT RECOMBINATION SCHEME  ... defines a way how the fourmomenta of particles will be combined to jets
    fastjet::RecombinationScheme recombScheme = fastjet::BIpt_scheme;
 
-   //DEFINE ANTIKT ALGORITHM  
-   fastjet::JetDefinition *jetDefAKTCh = NULL; 
+   //Define clustering algorithms
+	fastjet::JetDefinition *jetDefAKTCh = NULL; 
+	fastjet::JetDefinition *jetDefKTCh = NULL;
 
-   jetDefAKTCh = new fastjet::JetDefinition(fastjet::antikt_algorithm,
+	jetDefAKTCh = new fastjet::JetDefinition(fastjet::antikt_algorithm,
+                                                 jetParameterR,  
+                                                 recombScheme, 
+                                                 strategy);
+	jetDefKTCh = new fastjet::JetDefinition(fastjet::kt_algorithm,
                                                  jetParameterR,  
                                                  recombScheme, 
                                                  strategy);
@@ -170,73 +150,49 @@ int main(int argc, char* argv[]) {
 
    // FASTJET INPUT  : the algorithmus needs as an input list of particle fourmomenta verctors
    // in steps he merges these fourvecotors together and gets jets
-   std::vector<fastjet::PseudoJet> fjInputs;
+	std::vector<fastjet::PseudoJet> fjInputsAKT;
+	std::vector<fastjet::PseudoJet> fjInputsKT;
 
   
    //___________________________________________________ 
    //                HISTOGRAMS
 
+	//Histograms for the calculation of Xsection
+	
+	TString Xsstring = "fHistXsection";
+	TProfile* fHistXsection = new TProfile(Xsstring, "fHistXsection", 1, 0, 1);
+	fHistXsection->GetYaxis()->SetTitle("xsection");
+	
+	TString HTrials = "fHistTrials";
+	TH1F* fHistTrials = new TH1F(HTrials, "fHistTrials", 1, 0, 1);
+	fHistTrials->GetYaxis()->SetTitle("trials");
+	
+	//Histograms for JETS
    
-   //PT DISTRIBUTION OF TRACKS
-   TH1D* fTrackPt;
-   name = "hTrackPt";
-   fTrackPt = new TH1D(name.Data(),"Track pT distribution", 100, 0.0, 30.0);
-   fTrackPt->GetXaxis()->SetTitle("track p_{T} [GeV/c]");
-   fTrackPt->GetYaxis()->SetTitle("counts");
-   fTrackPt->Sumw2(); //tells to root to properly handle statistical errors
+	//pT distribution of jets, kT clustering
+	TH1D* fJetPt_KT;
+	name = "soft_hJetPt_kT"; 
+	fJetPt_KT = new TH1D(name.Data(), "Jet pT distribution for kT clustering sequence", 100, 0, 50.0);
+	fJetPt_KT->GetXaxis()->SetTitle("jet p_{T} [GeV/c]");
+	fJetPt_KT->GetYaxis()->SetTitle("counts");
+	fJetPt_KT->Sumw2();
 	
-	//Pseudorapidity distribution of tracks
-	TH1D* fTrackEta;
-   name = "hTrackEta";
-   fTrackEta = new TH1D(name.Data(),"Track pseudorapidity distribution", 100, -1.0, 1.0);
-   fTrackEta->GetXaxis()->SetTitle("track eta []");
-   fTrackEta->GetYaxis()->SetTitle("counts");
-   fTrackEta->Sumw2(); //tells to root to properly handle statistical errors
+	//pT distribution of jets, anti-kT clustering
+	TH1D* fJetPt_AKT;
+	name = "soft_hJetPt_anti-kT"; 
+	fJetPt_AKT = new TH1D(name.Data(), "Jet pT distribution for anti-kT clustering sequence", 100, 0, 50.0);
+	fJetPt_AKT->GetXaxis()->SetTitle("jet p_{T} [GeV/c]");
+	fJetPt_AKT->GetYaxis()->SetTitle("counts");
+	fJetPt_AKT->Sumw2();
 	
-	//Azimuthal distribution of tracks
-	TH1D* fTrackPhi;
-   name = "hTrackPhi";
-   fTrackPhi = new TH1D(name.Data(),"Track phi distribution", 100, -pi, pi);
-   fTrackPhi->GetXaxis()->SetTitle("track phi []");
-   fTrackPhi->GetYaxis()->SetTitle("counts");
-   fTrackPhi->Sumw2(); //tells to root to properly handle statistical errors
+	//pT distribution of jets, corrected values
+	TH1D* fJetPt_SUB;
+	name = "soft_hJetPt"; 
+	fJetPt_SUB = new TH1D(name.Data(), "Jet pT distribution with the subtraction of underlying events", 140, -20.0, 50.0);
+	fJetPt_SUB->GetXaxis()->SetTitle("jet p_{T} [GeV/c]");
+	fJetPt_SUB->GetYaxis()->SetTitle("counts");
+	fJetPt_SUB->Sumw2();
 	
-	
-   //PT DISTRIBUTIONS OF JETS
-   TH1D* fJetPt;
-   name = "hJetPt"; 
-   fJetPt = new TH1D(name.Data(), "Jet pT distribution", 100, 0, 50.0);
-   fJetPt->GetXaxis()->SetTitle("jet p_{T} [GeV/c]");
-   fJetPt->GetYaxis()->SetTitle("counts");
-   fJetPt->Sumw2();
-	
-	//Pseudorapidity distribution of jets
-	TH1D* fJetEta;
-   name = "hJetEta";
-   fJetEta = new TH1D(name.Data(),"Jet pseudorapidity distribution", 100, -1.0, 1.0);
-   fJetEta->GetXaxis()->SetTitle("Jet eta []");
-   fJetEta->GetYaxis()->SetTitle("counts");
-   fJetEta->Sumw2(); 
-	
-	//Azimuthal distribution of jets
-	TH1D* fJetPhi;
-   	name = "hJetPhi";
-   	fJetPhi = new TH1D(name.Data(),"Jet phi distribution", 100, 0, 2*pi);
-   	fJetPhi->GetXaxis()->SetTitle("Jet phi []");
-   	fJetPhi->GetYaxis()->SetTitle("counts");
-   	fJetPhi->Sumw2(); 
-	
-	TH2D* fJetArea;
-	name = "hJetArea";
-	fJetArea = new TH2D(name.Data(), "Jet area", 100, 0, 1.0, 100, 0, 50.0);
-	fJetArea-> GetXaxis()->SetTitle("Jet area");
-	fJetArea-> GetYaxis()->SetTitle("Jet pT");
-	
-	TH2D* fJetAD;
-	name = "hJetAD";
-	fJetAD = new TH2D(name.Data(), "Angular difference", 100, 0, 50.0, 100, 0, 2.*pi);
-	fJetAD-> GetXaxis()->SetTitle("Jet pT");
-	fJetAD-> GetYaxis()->SetTitle("Angular difference");
 
 
 
@@ -245,8 +201,9 @@ int main(int argc, char* argv[]) {
    for(int iEvent = 0; iEvent < nEvent; iEvent++){
       if(!pythia.next()) continue;
 
-      //here you start with event 
-      fjInputs.resize(0);  //reset the list of particles 
+	   //reset the list of particles
+		fjInputsAKT.resize(0);   
+		fjInputsKT.resize(0);
 
       //______________________________
       // LOOP OVER CHARGED TRACKS 
@@ -263,16 +220,15 @@ int main(int argc, char* argv[]) {
 		 //      plot pseudorapity and azimuthal distribution of tracks with pT > 150 MeV
 		 if(pythia.event[i].pT() > 0.15 && TMath::Abs(pythia.event[i].eta()) < trackEtaCut) {
 			 
-			 fjInputs.push_back( fastjet::PseudoJet(pythia.event[i].px(),         //make a list of charged particle 4-vectors from which he makes a jet
+			 fjInputsAKT.push_back( fastjet::PseudoJet(pythia.event[i].px(),         //make a list of charged particle 4-vectors from which he makes a jet
                                                    pythia.event[i].py(),
                                                    pythia.event[i].pz(),
-                                                   pythia.event[i].pAbs()));	//cout with tracks is suppressed
-			 
-			 fTrackEta->Fill(pythia.event[i].eta());
-			 fTrackPhi->Fill(pythia.event[i].phi());
-			 fTrackPt->Fill(pythia.event[i].pT()); //FILL HISTOGRAM WITH TRACK PT
+                                                   pythia.event[i].pAbs()));
+			 fjInputsKT.push_back( fastjet::PseudoJet(pythia.event[i].px(),         //make a list of charged particle 4-vectors from which he makes a jet
+									   pythia.event[i].py(),
+									   pythia.event[i].pz(),
+									   pythia.event[i].pAbs()));
 		 }				
-         
       }
       
 /*      //__________________________________________________
@@ -294,74 +250,58 @@ int main(int argc, char* argv[]) {
       }
 */
       //--------------------------------------------------------
-      vector<fastjet::PseudoJet> inclusiveJetsCh;
-      fastjet::ClusterSequenceArea clustSeq_Sig(fjInputs, *jetDefAKTCh, *areaDef);
+		vector<fastjet::PseudoJet> inclusiveAKTJetsCh;
+		fastjet::ClusterSequenceArea clustSeq_Sig_AKT(fjInputsAKT, *jetDefAKTCh, *areaDef);
+		vector<fastjet::PseudoJet> inclusiveKTJetsCh;
+		fastjet::ClusterSequenceArea clustSeq_Sig_KT(fjInputsKT, *jetDefKTCh, *areaDef);
 
-      inclusiveJetsCh = clustSeq_Sig.inclusive_jets(0.15); //the lowerst accepted  jet should have pT > 150 MeV
-                                                            // the lowest pT that can be measured by ALICE
-      //_______________________________________________________________________________________
-	   
-      //_______________________________________________________________________________________
-      //LOOP OVER jets and print their CONSTITUENTS
-      for(unsigned int ijet = 0; ijet < inclusiveJetsCh.size(); ijet++){ //loop over all full jets
-          //cout<<"JET ................ "<<ijet<<endl;
-          fastjet::PseudoJet fjJet = inclusiveJetsCh.at(ijet);
-		  bool ConditionJets = (fjJet.pt() > 10. && TMath::Abs(fjJet.eta()) < (trackEtaCut));
-		  
-          if(!ConditionJets) continue; 
-		  
-            vector<fastjet::PseudoJet> constituents =  clustSeq_Sig.constituents(inclusiveJetsCh[ijet]); //for jet get list of constituents
-            /*for(unsigned int ict = 0; ict < constituents.size(); ict++){
-               if(constituents.at(ict).pt() < 0.15) continue;
-               //cout<<"JETC pt="<<constituents.at(ict).pt() 
-               //    <<" eta ="<<constituents.at(ict).eta() 
-               //    <<" phi ="<<constituents.at(ict).phi()<<endl;
-               //	<<" lab ="<<constituents.at(ict).user_index()<<endl;
-				
-				
-            }*/
-		  
-		  //Histograms: area, pT, eta, phi
-		  if (fjJet.pt() > 10){
-			fJetArea->Fill((Double_t) fjJet.area(), (Double_t) fjJet.pt());
-		  }
-			fJetPt->Fill((Double_t) fjJet.pt()); 
-			fJetEta->Fill((Double_t) fjJet.eta());
-			fJetPhi->Fill((Double_t) fjJet.phi());
+		inclusiveAKTJetsCh = clustSeq_Sig_AKT.inclusive_jets(0.15); 
+		inclusiveKTJetsCh = clustSeq_Sig_KT.inclusive_jets(0.); 
 
-     }
-//cout<<"=============================================="<<endl;
-	   for (size_t i = 0; i < static_cast<size_t>(pythia.event.size()); i++){
-		   if (!pythia.event[i].isFinal()) continue;
-		   if (!pythia.event[i].isCharged()) continue;
-		   if (pythia.event[i].pT() > 10. && pythia.event[i].pT() < 50.){
-			   for (size_t j = 0; j < inclusiveJetsCh.size(); j++){
-				   fastjet::PseudoJet fjJet = inclusiveJetsCh.at(j);
-				   if (((Double_t) fjJet.pt()) < 10.) continue;
-				   fJetAD->Fill((Double_t) fjJet.pt(), RecalcAngle(RecalcAngle(pythia.event[i].phi()) - fjJet.phi()));// HIST: angular difference against pT
-			   }
-		   }
-	   }
+		  //_______________________________________________________________________________________
+
+		  //_______________________________________________________________________________________
+		  //LOOP OVER jets and print their CONSTITUENTS
+		double rhosum = 0.;
+		for(unsigned int ijet = 0; ijet < inclusiveKTJetsCh.size(); ijet++){ //loop over all full jets, kT
+			fastjet::PseudoJet fjJet_KT = inclusiveKTJetsCh.at(ijet);		  
+			if(!(TMath::Abs(fjJet_KT.eta()) < (trackEtaCut))) continue; 
+			rhosum += (fjJet_KT.pt() / fjJet_KT.area());
+			fJetPt_KT->Fill((Double_t) fjJet_KT.pt()); 
+		}
+		double rho = rhosum / inclusiveKTJetsCh.size();
+
+		for(unsigned int aktjet = 0; aktjet < inclusiveAKTJetsCh.size(); aktjet++){ //loop over all full jets, anti-kT + subtraction
+			fastjet::PseudoJet fjJet_AKT = inclusiveAKTJetsCh.at(aktjet);		  
+			if(!(TMath::Abs(fjJet_AKT.eta()) < (trackEtaCut))) continue; 
+			fJetPt_AKT->Fill((Double_t) fjJet_AKT.pt()); 
+			//subtract underlying events
+			Double_t corr_pt = (Double_t) fjJet_AKT.pt() - rho * (Double_t) fjJet_AKT.area();
+			fJetPt_SUB->Fill(corr_pt); 
+		}
 
    }// End of event loop.
 
+	//Fill histograms to obtain cross sections
+	fHistXsection->Fill(0.5,pythia.info.sigmaGen());
+	fHistTrials->Fill(0.5, pythia.info.nAccepted());
+	Double_t xsection = fHistXsection->GetMean(2);
+	Double_t ntrials =  fHistTrials->Integral();
+	Double_t weight = xsection/ntrials;
+	
+	fJetPt_SUB->Scale(weight);
+	
+	
    //____________________________________________________
    //          SAVE OUTPUT
 	MakeDir("./", "Results");
 	
-   TString tag = Form("PP7_pythia_ANTIKT%02d", TMath::Nint(jetParameterR*10) );
+	TString tag = Form("hard_PP7_pth_akT_kT%02d", TMath::Nint(jetParameterR*10) );
 
-   TFile* outFile = new TFile(Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed), "RECREATE");
-   outFile->cd();
+	TFile* outFile = new TFile(Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed), "UPDATE");
+	outFile->cd();
 
-   	fTrackPt->Write();
-	fTrackEta->Write();
-	fTrackPhi->Write();
-   	fJetPt->Write();
-	fJetEta->Write();
-	fJetPhi->Write();
-	fJetArea->Write();
-	fJetAD->Write();
+	fJetPt_SUB->Write();
 
    	outFile->Close();
 
