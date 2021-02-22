@@ -187,10 +187,10 @@ int soft(int argc, vector<string> argv) {
 	
 	//pT distribution of jets, corrected values
 	TH1D* fJetPt_SUB;
-	name = "soft_hJetPt"; 
+	name = "soft_hJetXsect"; 
 	fJetPt_SUB = new TH1D(name.Data(), "Jet pT distribution with the subtraction of underlying events", 140, -20.0, 50.0);
-	fJetPt_SUB->GetXaxis()->SetTitle("jet p_{T} [GeV/c]");
-	fJetPt_SUB->GetYaxis()->SetTitle("counts");
+	fJetPt_SUB->GetXaxis()->SetTitle("#it{p}_{T,ch jet} (GeV/#it{c})");
+	fJetPt_SUB->GetYaxis()->SetTitle("cross section (mb)");
 	fJetPt_SUB->Sumw2();
 	
 
@@ -296,7 +296,7 @@ int soft(int argc, vector<string> argv) {
    //          SAVE OUTPUT
 	MakeDir("./", "Results");
 	
-	TString tag = Form("hard_PP7_pth_akT_kT%02d", TMath::Nint(jetParameterR*10) );
+	TString tag = Form("PP7_pth_akT_kT%02d", TMath::Nint(jetParameterR*10) );
 
 	TFile* outFile = new TFile(Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed), "UPDATE");
 	outFile->cd();

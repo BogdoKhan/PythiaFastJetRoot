@@ -160,8 +160,8 @@ int hard(int argc, vector<string> argv) {
 	TH1D* fJetXsect_SUB;
 	name = "hard_hJetXsect"; 
 	fJetXsect_SUB = new TH1D(name.Data(), "Jet pT distribution with the subtraction of underlying events", 140, -20.0, 50.0);
-	fJetXsect_SUB->GetXaxis()->SetTitle("jet p_{T} [GeV/c]");
-	fJetXsect_SUB->GetYaxis()->SetTitle("counts");
+	fJetXsect_SUB->GetXaxis()->SetTitle("#it{p}_{T,ch jet} (GeV/#it{c})");
+	fJetXsect_SUB->GetYaxis()->SetTitle("cross section (mb)");
 	fJetXsect_SUB->Sumw2();
 	
 	//Begin of hard bins summation loop
@@ -313,7 +313,7 @@ int hard(int argc, vector<string> argv) {
    //          SAVE OUTPUT
 	MakeDir("./", "Results");
 	
-	TString tag = Form("hard_PP7_pth_akT_kT%02d", TMath::Nint(jetParameterR*10) );
+	TString tag = Form("PP7_pth_akT_kT%02d", TMath::Nint(jetParameterR*10) );
 
 	TFile* outFile = new TFile(Form("./Results/%s_tune%d_c%d.root",tag.Data(), tune, seed), "RECREATE");
 	outFile->cd();

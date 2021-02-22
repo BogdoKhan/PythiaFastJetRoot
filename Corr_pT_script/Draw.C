@@ -26,7 +26,7 @@ Int_t Draw(){
    if(!hard) return 21; 
 
    //READ HISTOGRAM 
-   TH1D*  soft = (TH1D*) f1->Get("soft_hJetPt");
+   TH1D*  soft = (TH1D*) f1->Get("soft_hJetXsect");
    //TH1D*  soft = (TH1D*) f2->Get("soft_hJetPt");
    if(!soft) return 21; 
 
