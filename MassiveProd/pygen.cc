@@ -222,7 +222,7 @@ TH1Coll Run(int argc, vector<string> argv) {
 	
 
 
-   Int_t nEvent=(Int_t) 1e3;
+   Int_t nEvent=(Int_t) 1e1;
    //Int_t nEvent=(Int_t) 2e5;
   
    TString name; 
@@ -641,11 +641,16 @@ int main (int argc, char* argv[]){
 		
 	vector<future<TH1Coll>> futs;
 	
+	string seedpath = "./Results/" + to_string(rndseed) + "/";
+	char* nseed = argv[2];
+	
 	MakeDir("./", "Results");
+	MakeDir("./Results/", to_string(rndseed));
+	MakeDir(seedpath, "by_TT");
+	MakeDir(seedpath, "by_pT_range");
 	
 	vector<TH1Coll> Col_fspace;
 	for (size_t itt = 0; itt < ttl.size(); itt++){
-		MakeDir("./Results/", "Full_bins");
 		vector<TH1Coll> Collection;
 		for (size_t ipt = 0; ipt < pthmin.size(); ipt++){
 			TH1Coll* hcol = new TH1Coll(ttl.at(itt), tth.at(itt), pthmin.at(ipt), pthmax.at(ipt), rndseed*51);
@@ -683,9 +688,9 @@ int main (int argc, char* argv[]){
 			   ttl.at(itt), tth.at(itt));
 
 			if(pthmin.at(ipt)<0 || pthmax.at(ipt) <0){
-				name = Form("%s_tune%d_MB_c%d.root",tag.Data(), tune, rndseed);
+				name = Form("./Results/%s/%s_tune%d_MB_c%s.root", nseed, tag.Data(), tune, nseed);
 			}else{
-				name = Form("./Results/%s_HB%d_%d_tune%d_c%d.root",tag.Data(), pthmin.at(ipt), pthmax.at(ipt), tune, rndseed);
+				name = Form("./Results/%s/by_pT_range/%s_HB%d_%d_tune%d_c%s.root", nseed, tag.Data(), pthmin.at(ipt), pthmax.at(ipt), tune, nseed);
 			}
 
 			TFile* outFile = new TFile(name.Data(), "RECREATE");
@@ -715,7 +720,7 @@ int main (int argc, char* argv[]){
 			   ttl.at(itt), tth.at(itt));
 
 		
-		name = Form("./Results/Full_bins/%s_HB_tune%d_c%d.root",tfull.Data(), tune, rndseed);
+		name = Form("./Results/%s/by_TT/%s_HB_tune%d_c%s.root", nseed, tfull.Data(), tune, nseed);
 		
 		TFile* outFile1 = new TFile(name.Data(), "RECREATE");
 		outFile1->cd();
@@ -743,7 +748,7 @@ int main (int argc, char* argv[]){
 		   TMath::Nint(jr*10));
 
 
-	name = Form("./Results/Full_bins/%s_HB_tune%d_c%d-FULL.root",tfull.Data(), tune, rndseed);
+	name = Form("./Results/%s/%s_HB_tune%d_c%s-FULL.root", nseed, tfull.Data(), tune, nseed);
 
 	TFile* outFile2 = new TFile(name.Data(), "RECREATE");
 	outFile2->cd();
