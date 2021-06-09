@@ -26,7 +26,6 @@
 #include "TH3D.h"
 #include "TFile.h"
 #include "TClonesArray.h"
-#include "TFile.h"
 #include "TList.h"
 #include "TVector.h"
 #include "TVector2.h"
@@ -44,6 +43,8 @@
 #include <vector>
 #include <sys/stat.h>
 #include <ctime>
+#include <cstring>
+#include <string>
 #include "TROOT.h"
 
 
@@ -75,16 +76,23 @@ TString trg[]={"MB","FIT"};
 
 class TH1Coll {
 public:
-	//vector<TH1D> h1[4] = [fhTTH_mb][fhRec-pT_mb][fhTTH_FIT][fhRec-pT_FIT]
-	//vector<TH2D> h2[2] = [fhRec-phi_mb][fhRec-phi_FIT]
+	//vector<TH1D> h1t(2) = [fhTTH_mb],[fhTTH_FIT]
+	//vector<TH1D> h1h(2) = [fhRec-pT_mb], [fhRec-pt_FIT]
+	//vector<TH2D> h2(2) = [fhRec-phi_mb],[fhRec-phi_FIT]
+	//vector<TProfile> hXsect(2) = [Xsect_mb],[Xsect_FIT]
+	//vector<TH1F> hNtrials(2) = [Ntrials_mb], [Ntrials_FIT]
 	
 	vector<TH1D> h1t;
 	vector<TH1D> h1h;
 	vector<TH2D> h2;
+	vector<TProfile> hXsect;
+	vector<TH1F> hNtrials;
 	
 	TH1D* fhTTH_PartLevel[kTRIG];
 	TH1D* fhRecoilJetPtTTH_PartLevel[kTRIG];
-	TH2D *fhRecoilJetPhiTTH_PartLevel[kTRIG]; 
+	TH2D* fhRecoilJetPhiTTH_PartLevel[kTRIG]; 
+	TProfile* hXsect_part[kTRIG];
+	TH1F* hNtrials_part[kTRIG];
 	
 	TH1Coll():
 	_ttl(-1), _tth(-1), _ptmin(-1), _ptmax(-1), _nseed(0)
@@ -131,12 +139,7 @@ public:
 		return _nseed;
 	}
 	
-   //TProfile* fHistXs = new TProfile("fHistXs", "fHistXs", 1, 0, 1);
-   //fHistXs->GetYaxis()->SetTitle("xsection");
-
-   //TH1F* fHistTr = new TH1F("fHistTr", "fHistTr", 1, 0, 1);
-   //fHistTr->GetYaxis()->SetTitle("trials");
-	
+   
       
 private:
 	int _ttl;
@@ -162,18 +165,29 @@ private:
 			fhTTH_PartLevel[ig]->Sumw2();
 			h1t.push_back(*fhTTH_PartLevel[ig]);
 			
-
 			//HJET SPECTRA
 			name = Form("fhRecoilJetPt_%s_PartLevel_seed_%d_t_%d_p%d", trg[ig].Data(), _nseed, _ttl, _ptmin);
 			fhRecoilJetPtTTH_PartLevel[ig] = new TH1D(name.Data(), name.Data(), 200, -20, 180);
 			fhRecoilJetPtTTH_PartLevel[ig]->Sumw2();
 			h1h.push_back(*fhRecoilJetPtTTH_PartLevel[ig]);
-
+			
+			//HJET_Phi
 			name = Form("fhRecoilJetPhi_%s_PartLevel_seed_%d_t_%d_p%d", trg[ig].Data(), _nseed, _ttl, _ptmin);
 			fhRecoilJetPhiTTH_PartLevel[ig] = new TH2D(name.Data(), name.Data(), npTbins3, pTbins3, narrPhi, arrPhi);
 			fhRecoilJetPhiTTH_PartLevel[ig]->Sumw2();
 			h2.push_back(*fhRecoilJetPhiTTH_PartLevel[ig]);
-
+			
+			//Profile for Xsection
+			name = Form("hXsect_%s_PartLevel_seed_%d_t_%d_p%d", trg[ig].Data(), _nseed, _ttl, _ptmin);
+			hXsect_part[ig] = new TProfile(name.Data(), name.Data(), 1, 0, 1);
+   			hXsect_part[ig]->GetYaxis()->SetTitle("xsection");
+			hXsect.push_back(*hXsect_part[ig]);
+			
+			//Add Ntrials
+			name = Form("hNtrials_%s_PartLevel_seed_%d_t_%d_p%d", trg[ig].Data(), _nseed, _ttl, _ptmin);
+  			hNtrials_part[ig]= new TH1F(name.Data(), name.Data(), 1, 0, 1);
+   			hNtrials_part[ig]->GetYaxis()->SetTitle("trials");
+			hNtrials.push_back(*hNtrials_part[ig]);
 		}
 	}
 };
@@ -183,12 +197,13 @@ TH1Coll operator+(const TH1Coll& lhs, const TH1Coll& rhs){
 								  lhs.sptmin(), lhs.sptmax(),
 								  lhs.snseed());*/
 	TH1Coll thcnew = lhs;
-	thcnew.h1t[0] = lhs.h1t[0] + rhs.h1t[0];
-	thcnew.h1t[1] = lhs.h1t[1] + rhs.h1t[1];
-	thcnew.h1h[0] = lhs.h1h[0] + rhs.h1h[0];
-	thcnew.h1h[1] = lhs.h1h[1] + rhs.h1h[1];
-	thcnew.h2[0].Add(&(lhs.h2[0]), &(rhs.h2[0]),1,1);
-	thcnew.h2[1].Add(&(lhs.h2[1]), &(rhs.h2[1]),1,1);
+	for (size_t i = 0; i <= 1; i++) {
+		thcnew.h1t[i] = lhs.h1t[i] + rhs.h1t[i];
+		thcnew.h1h[i] = lhs.h1h[i] + rhs.h1h[i];
+		thcnew.h2[i].Add(&(lhs.h2[i]), &(rhs.h2[i]),1,1);
+		thcnew.hXsect[i].Add(&(lhs.hXsect[i]), &(rhs.hXsect[i]),1,1);
+		thcnew.hNtrials[i].Add(&(lhs.hNtrials[i]), &(rhs.hNtrials[i]),1,1);
+	}
 	return thcnew;
 }
 
@@ -252,7 +267,7 @@ TH1Coll Run(int argc, vector<string> argv) {
 
    pythia.readString("Random:setSeed = on");
    //pythia.readString(Form("Random:seed = %d",cislo));
-   pythia.readString(Form("Random:seed = %d",0));
+   pythia.readString(Form("Random:seed = %d",cislo));
 
    //pythia.readString("SoftQCD:inelastic = on");
    pythia.readString("HardQCD:all = on");
@@ -329,9 +344,11 @@ TH1Coll Run(int argc, vector<string> argv) {
    //TString trg[]={"MB","FIT"};  
 
    //TT SPECTRA
-   TH1D* fhTTH_PartLevel[kTRIG];
-   TH1D* fhRecoilJetPtTTH_PartLevel[kTRIG];
-   TH2D *fhRecoilJetPhiTTH_PartLevel[kTRIG]; 
+	TH1D* fhTTH_PartLevel[kTRIG];
+	TH1D* fhRecoilJetPtTTH_PartLevel[kTRIG];
+	TH2D* fhRecoilJetPhiTTH_PartLevel[kTRIG]; 
+	TProfile* hXsect_part[kTRIG];
+	TH1F* hNtrials_part[kTRIG];
 
    Double_t pTbins3[]   = {-20,-15,-10,-5,-4,-3,-2,-1,0,1,2,3,4,5,10,15,20,25,30,35,40,45,50,60,70,80,100,120,140,160,180,200};
    const Int_t npTbins3 = sizeof(pTbins3)/sizeof(Double_t)-1;
@@ -343,27 +360,28 @@ TH1Coll Run(int argc, vector<string> argv) {
   
 
    for(Int_t ig = kMB; ig<kTRIG; ig++){
-      name = Form("hTT_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(), cislo, trigRangeLow, ptHatMin);
-      fhTTH_PartLevel[ig] = new TH1D(name.Data(),name.Data(), 100, 0, 100);
-      fhTTH_PartLevel[ig]->Sumw2();
-      
-      //HJET SPECTRA
-      name = Form("fhRecoilJetPt_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(), cislo, trigRangeLow, ptHatMin);
-      fhRecoilJetPtTTH_PartLevel[ig] = new TH1D(name.Data(), name.Data(), 200, -20, 180);
-      fhRecoilJetPtTTH_PartLevel[ig]->Sumw2();
-      
-      name = Form("fhRecoilJetPhi_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(),cislo, trigRangeLow, ptHatMin);
-      fhRecoilJetPhiTTH_PartLevel[ig] = new TH2D(name.Data(), name.Data(), npTbins3, pTbins3, narrPhi, arrPhi);
-      fhRecoilJetPhiTTH_PartLevel[ig]->Sumw2();
-      
+		name = Form("hTT_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(), cislo, trigRangeLow, ptHatMin);
+		fhTTH_PartLevel[ig] = new TH1D(name.Data(),name.Data(), 100, 0, 100);
+		fhTTH_PartLevel[ig]->Sumw2();
+
+		//HJET SPECTRA
+		name = Form("fhRecoilJetPt_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(), cislo, trigRangeLow, ptHatMin);
+		fhRecoilJetPtTTH_PartLevel[ig] = new TH1D(name.Data(), name.Data(), 200, -20, 180);
+		fhRecoilJetPtTTH_PartLevel[ig]->Sumw2();
+
+		name = Form("fhRecoilJetPhi_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(),cislo, trigRangeLow, ptHatMin);
+		fhRecoilJetPhiTTH_PartLevel[ig] = new TH2D(name.Data(), name.Data(), npTbins3, pTbins3, narrPhi, arrPhi);
+		fhRecoilJetPhiTTH_PartLevel[ig]->Sumw2();
+
+		name = Form("fHistXsections_%s_%d_tt_%d_pt%d", trg[ig].Data(), cislo, trigRangeLow, ptHatMin);
+		hXsect_part[ig] = new TProfile(name.Data(), name.Data(), 1, 0, 1);
+		hXsect_part[ig]->GetYaxis()->SetTitle("xsection");
+
+		name = Form("fHistTrials_%s_%d_tt_%d_pt%d", trg[ig].Data(), cislo, trigRangeLow, ptHatMin);
+		hNtrials_part[ig] = new TH1F(name.Data(), name.Data(), 1, 0, 1);
+		hNtrials_part[ig]->GetYaxis()->SetTitle("trials");
    }      
-	name = Form("fHistXsections%d_tt_%d_pt%d", cislo, trigRangeLow, ptHatMin);
-   TProfile* fHistXs = new TProfile(name.Data(), name.Data(), 1, 0, 1);
-   fHistXs->GetYaxis()->SetTitle("xsection");
-	
-	name = Form("fHistTrials%d_tt_%d_pt%d", cislo, trigRangeLow, ptHatMin);
-   TH1F* fHistTr = new TH1F(name.Data(), name.Data(), 1, 0, 1);
-   fHistTr->GetYaxis()->SetTitle("trials");
+
 
    //PT HARD
    //___________________________________________________ 
@@ -530,10 +548,10 @@ TH1Coll Run(int argc, vector<string> argv) {
 
             ptTriggGen = pythia.event[idxtrig].pT(); //TT  pT
 
-	    for(Int_t ig=0; ig< kTRIG; ig++){
-               if(!bfill[ig]) continue;
-               fhTTH_PartLevel[ig]->Fill(ptTriggGen);
-	    }
+			for(Int_t ig=0; ig< kTRIG; ig++){
+				   if(!bfill[ig]) continue;
+				   fhTTH_PartLevel[ig]->Fill(ptTriggGen);
+			}
 
             //Count jets and trigger-jet pairs at MC  generator level
             for(unsigned int ijet = 0; ijet < inclusiveJetsAKT.size(); ijet++){
@@ -546,8 +564,8 @@ TH1Coll Run(int argc, vector<string> argv) {
                ptjetcorr = fjJet.pt()  - rho * fjJet.area();
 
 	       for(Int_t ig=0; ig< kTRIG; ig++){
-                  if(!bfill[ig]) continue; 
-                  fhRecoilJetPhiTTH_PartLevel[ig]->Fill(ptjetcorr, dphi);
+				if(!bfill[ig]) continue; 
+				fhRecoilJetPhiTTH_PartLevel[ig]->Fill(ptjetcorr, dphi);
 	       }
 
                if(TMath::Abs((Float_t) TVector2::Phi_mpi_pi(dphi)) < fkDeltaPhiCut) continue;
@@ -560,39 +578,41 @@ TH1Coll Run(int argc, vector<string> argv) {
          }//etacut
       }//TT
    }// End of event loop.
+   for(Int_t ig=0; ig< kTRIG; ig++){
+		if(!bfill[ig]) continue;
+		hXsect_part[ig]->Fill(0.5,pythia.info.sigmaGen());
+		hNtrials_part[ig]->Fill(0.5, pythia.info.nAccepted());
+   }
 
-
-   fHistXs->Fill(0.5,pythia.info.sigmaGen());
-   fHistTr->Fill(0.5, pythia.info.nAccepted());
+   //fHistXs->Fill(0.5,pythia.info.sigmaGen());
+   //fHistTr->Fill(0.5, pythia.info.nAccepted());
    //____________________________________________________
    //          SAVE OUTPUT
 
-	Double_t xsection = fHistXs->GetMean(2);
-	Double_t ntrials =  fHistTr->Integral();
-	Double_t weight = xsection/ntrials;
+	//Double_t xsection = fHistXs->GetMean(2);
+	//Double_t ntrials =  fHistTr->Integral();
+	//Double_t weight = xsection/ntrials;
 
    
    for(Int_t ig=0; ig< kTRIG; ig++){
       //TT SPECTRA
-	   fhTTH_PartLevel[ig]->Scale(weight);
-	   fhRecoilJetPtTTH_PartLevel[ig]->Scale(weight);
-	   //fhRecoilJetPhiTTH_PartLevel[ig]->Scale(weight);
+	   //fhTTH_PartLevel[ig]->Scale(weight);
+	   //fhRecoilJetPtTTH_PartLevel[ig]->Scale(weight);
 	   (*EvCollection).h1t[ig] = *fhTTH_PartLevel[ig];
       //HJET SPECTRA
 	   (*EvCollection).h1h[ig] = *fhRecoilJetPtTTH_PartLevel[ig];
 	   (*EvCollection).h2[ig] = *fhRecoilJetPhiTTH_PartLevel[ig];
+	   //Xsect & Ntrials spectra
+	   (*EvCollection).hXsect[ig] = *hXsect_part[ig];
+	   (*EvCollection).hNtrials[ig] = *hNtrials_part[ig];
    }
-	   for(Int_t ig=0; ig< kTRIG; ig++){
+   for(Int_t ig=0; ig< kTRIG; ig++){
 	   delete fhTTH_PartLevel[ig];
 	   delete fhRecoilJetPtTTH_PartLevel[ig];
 	   delete fhRecoilJetPhiTTH_PartLevel[ig];
-		      }
-   //fHistXs->Write();
-   //fHistTr->Write();
-
-
-  
-
+	   delete hXsect_part[ig];
+	   delete hNtrials_part[ig];
+  }
 
    pythia.stat();
    return *EvCollection;
@@ -629,6 +649,7 @@ int main (int argc, char* argv[]){
 	
 	tune = atoi(argv[1]);
 	rndseed = atoi(argv[2]);
+	Int_t cislo = atoi(argv[2]);
 	jr = atof(argv[3]);
 	nthr = atoi(argv[4]);
 	
@@ -637,7 +658,7 @@ int main (int argc, char* argv[]){
 	vector<Int_t> pthmin = {4, 11, 21, 36, 56, 84, 117, 156, 200, 249};  //hard bin
 	vector<Int_t> pthmax = {11, 21, 36, 56, 84, 117, 156, 200, 249, 1000}; //hard bin
 	
-	jr = 0.4;     //jet R
+	//jr = 0.4;     //jet R
 		
 	vector<future<TH1Coll>> futs;
 	
@@ -646,12 +667,14 @@ int main (int argc, char* argv[]){
 	
 	MakeDir("./", "Results");
 	MakeDir("./Results/", to_string(rndseed));
-	MakeDir(seedpath, "by_TT");
-	MakeDir(seedpath, "by_pT_range");
 	
 	vector<TH1Coll> Col_fspace;
 	for (size_t itt = 0; itt < ttl.size(); itt++){
 		vector<TH1Coll> Collection;
+		
+		string tt_path = "TT-" + to_string(ttl.at(itt)) + "_" + to_string(tth.at(itt));
+		MakeDir(seedpath, tt_path);
+		
 		for (size_t ipt = 0; ipt < pthmin.size(); ipt++){
 			TH1Coll* hcol = new TH1Coll(ttl.at(itt), tth.at(itt), pthmin.at(ipt), pthmax.at(ipt), rndseed*51);
 
@@ -686,26 +709,72 @@ int main (int argc, char* argv[]){
 			TString tag = Form("PP6p35_ANTIKT%02d_TT%d_%d",
 			   TMath::Nint(jr*10), 
 			   ttl.at(itt), tth.at(itt));
-
+			
 			if(pthmin.at(ipt)<0 || pthmax.at(ipt) <0){
 				name = Form("./Results/%s/%s_tune%d_MB_c%s.root", nseed, tag.Data(), tune, nseed);
 			}else{
-				name = Form("./Results/%s/by_pT_range/%s_HB%d_%d_tune%d_c%s.root", nseed, tag.Data(), pthmin.at(ipt), pthmax.at(ipt), tune, nseed);
+				name = Form("./Results/%s/TT-%s_%s/%s_HB%d_%d_tune%d_c%s.root", nseed, 
+							to_string(ttl.at(itt)).c_str(), to_string(tth.at(itt)).c_str(), 
+							tag.Data(), pthmin.at(ipt), pthmax.at(ipt), tune, nseed);
 			}
 
 			TFile* outFile = new TFile(name.Data(), "RECREATE");
 			outFile->cd();
-			(*hcol).h1t[0].Write();
-			(*hcol).h1h[0].Write();
-			(*hcol).h2[0].Write();
-			(*hcol).h1t[1].Write();
-			(*hcol).h1h[1].Write();
-			(*hcol).h2[1].Write();
-			
+			//find weights in histos
+			//Double_t weight_mb = 1;
+			//Double_t weight_FIT = 1;
+			//Double_t xsection_mb = (*hcol).hXsect[0].GetMean(2);
+			//Double_t ntrials_mb =  (*hcol).hNtrials[0].Integral();
+			//if (ntrials_mb != 0) {
+			//	weight_mb = xsection_mb/ntrials_mb;
+			//}
+			//Double_t xsection_FIT = (*hcol).hXsect[1].GetMean(2);
+			//Double_t ntrials_FIT =  (*hcol).hNtrials[1].Integral();
+			//if (ntrials_FIT == 0) {
+			//	weight_FIT = xsection_FIT/ntrials_FIT;
+			//}
+			//scaling for xsection
+			//(*hcol).h1t[0].Scale(weight_mb);
+			//(*hcol).h1h[0].Scale(weight_mb);
+			//(*hcol).h1t[1].Scale(weight_FIT);
+			//(*hcol).h1h[1].Scale(weight_FIT);
+			//write in file
+			for(Int_t ig=0; ig< kTRIG; ig++){
+				name = Form("hTT_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(), cislo, ttl.at(itt), pthmin.at(ipt));
+				(*hcol).h1t[ig].SetName(name.Data());
+				(*hcol).h1t[ig].Write();
+				
+				name = Form("fhRecoilJetPt_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(), cislo, ttl.at(itt), pthmin.at(ipt));
+				(*hcol).h1h[ig].SetName(name.Data());
+				(*hcol).h1h[ig].Write();
+
+				name = Form("fhRecoilJetPhi_%s_PartLevel_seed%d_tt_%d_pt%d", trg[ig].Data(),cislo, ttl.at(itt), pthmin.at(ipt));
+				(*hcol).h2[ig].SetName(name.Data());
+				(*hcol).h2[ig].Write();
+
+				name = Form("fHistXsections_%s_%d_tt_%d_pt%d", trg[ig].Data(), cislo, ttl.at(itt), pthmin.at(ipt));
+				(*hcol).hXsect[ig].SetName(name.Data());
+				(*hcol).hXsect[ig].Write();
+				
+				name = Form("fHistTrials_%s_%d_tt_%d_pt%d", trg[ig].Data(), cislo, ttl.at(itt), pthmin.at(ipt));
+				(*hcol).hNtrials[ig].SetName(name.Data());
+				(*hcol).hNtrials[ig].Write();
+				
+				/*(*hcol).h1t[0].Write();
+				(*hcol).h1h[0].Write();
+				(*hcol).h2[0].Write();
+				(*hcol).h1t[1].Write();
+				(*hcol).h1h[1].Write();
+				(*hcol).h2[1].Write();
+				(*hcol).hXsect[0].Write();
+				(*hcol).hXsect[1].Write();
+				(*hcol).hNtrials[0].Write();
+				(*hcol).hNtrials[1].Write();*/
+			}
 			 outFile->Close();
 		}
 		
-		TH1Coll* ttColl = new TH1Coll(Collection.at(0));
+/*		TH1Coll* ttColl = new TH1Coll(Collection.at(0));
 		bool isNotFirst = false;
 		for (auto& item : Collection) {
 			if (isNotFirst) {
@@ -724,12 +793,35 @@ int main (int argc, char* argv[]){
 		
 		TFile* outFile1 = new TFile(name.Data(), "RECREATE");
 		outFile1->cd();
+		//find weights in histos
+		Double_t t_weight_mb = 1;
+		Double_t t_weight_FIT = 1;
+		Double_t t_xsection_mb = (*ttColl).hXsect[0].GetMean(2);
+		Double_t t_ntrials_mb =  (*ttColl).hNtrials[0].Integral();
+		if (t_ntrials_mb != 0) {
+			t_weight_mb = t_xsection_mb/t_ntrials_mb;
+		}
+		Double_t t_xsection_FIT = (*ttColl).hXsect[1].GetMean(2);
+		Double_t t_ntrials_FIT =  (*ttColl).hNtrials[1].Integral();
+		if (t_ntrials_FIT != 0) {
+			t_weight_FIT = t_xsection_FIT/t_ntrials_FIT;
+		}
+		//scaling for xsection
+		(*ttColl).h1t[0].Scale(t_weight_mb);
+		(*ttColl).h1h[0].Scale(t_weight_mb);
+		(*ttColl).h1t[1].Scale(t_weight_FIT);
+		(*ttColl).h1h[1].Scale(t_weight_FIT);
+		//Write in file
 		(*ttColl).h1t[0].Write();
 		(*ttColl).h1h[0].Write();
 		(*ttColl).h2[0].Write();
 		(*ttColl).h1t[1].Write();
 		(*ttColl).h1h[1].Write();
 		(*ttColl).h2[1].Write();
+		(*ttColl).hXsect[0].Write();
+		(*ttColl).hXsect[1].Write();
+		(*ttColl).hNtrials[0].Write();
+		(*ttColl).hNtrials[1].Write();
 
 		 outFile1->Close();
 
@@ -752,17 +844,39 @@ int main (int argc, char* argv[]){
 
 	TFile* outFile2 = new TFile(name.Data(), "RECREATE");
 	outFile2->cd();
+	//find weights in histos
+	Double_t f_weight_mb = 1;
+	Double_t f_weight_FIT = 1;
+	Double_t f_xsection_mb = (*finalColl).hXsect[0].GetMean(2);
+	Double_t f_ntrials_mb =  (*finalColl).hNtrials[0].Integral();
+	if (f_ntrials_mb != 0) {
+		f_weight_mb = f_xsection_mb/f_ntrials_mb;
+	}
+
+	Double_t f_xsection_FIT = (*finalColl).hXsect[1].GetMean(2);
+	Double_t f_ntrials_FIT =  (*finalColl).hNtrials[1].Integral();
+	if (f_ntrials_FIT != 0) {
+		f_weight_FIT = f_xsection_FIT/f_ntrials_FIT;
+	}
+	//scaling for xsection
+	(*finalColl).h1t[0].Scale(f_weight_mb);
+	(*finalColl).h1h[0].Scale(f_weight_mb);
+	(*finalColl).h1t[1].Scale(f_weight_FIT);
+	(*finalColl).h1h[1].Scale(f_weight_FIT);
+	//Write in file
 	(*finalColl).h1t[0].Write();
 	(*finalColl).h1h[0].Write();
 	(*finalColl).h2[0].Write();
 	(*finalColl).h1t[1].Write();
 	(*finalColl).h1h[1].Write();
 	(*finalColl).h2[1].Write();
+	(*finalColl).hXsect[0].Write();
+	(*finalColl).hXsect[1].Write();
+	(*finalColl).hNtrials[0].Write();
+	(*finalColl).hNtrials[1].Write();
+	
 
-	 outFile2->Close();
-
-
-
+	 outFile2->Close();*/
+	}
 	return 0;
-
 }
