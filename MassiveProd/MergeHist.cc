@@ -162,11 +162,11 @@ void Scaling(TString fname, Int_t cislo, Int_t trigRangeLow){
 	TFile* f1 = TFile::Open(fname, "UPDATE");
 	TFile *outFile = new TFile("Res_scaled.root", "RECREATE");
 	outFile->cd();
-	//Make counts for known luminosities: let us have 4 pb^-1 -> 4 pb^-1 = 4e6 mb^-1;
-	//pp-luminosities: 3 pb^-1 = 3e6 mb^-1
-	//OO-luminosities: 0.5 pb^-1; 1 pb^-1; 2pb^-1; 4pb^-1;
+	//Make counts for known luminosities: let us have 4 nb^-1 -> 4 nb^-1 = 4e6 mb^-1;
+	//pp-luminosities: 3 pb^-1 = 3e9 mb^-1
+	//OO-luminosities: 0.5 nb^-1; 1 nb^-1; 2nb^-1; 4nb^-1;
 	//Xsection for OO-collisions: A(O) = 16; Xs(OO) = Xs(pp)*A^2;
-	Int_t luminosity = 4e6; //4 pb^-1 -> 4e6 mb^-1;
+	Int_t luminosity = 4e6; //4 nb^-1 -> 4e6 mb^-1;
 	Int_t A = 16; //oxygen mass in amu
 	Int_t factorOO = A * A * luminosity;
 

@@ -563,16 +563,16 @@ TH1Coll Run(int argc, vector<string> argv) {
                dphi = TVector2::Phi_0_2pi(pythia.event[idxtrig].phi() - fjJet.phi());
                ptjetcorr = fjJet.pt()  - rho * fjJet.area();
 
-	       for(Int_t ig=0; ig< kTRIG; ig++){
-				if(!bfill[ig]) continue; 
-				fhRecoilJetPhiTTH_PartLevel[ig]->Fill(ptjetcorr, dphi);
-	       }
+			   for(Int_t ig=0; ig< kTRIG; ig++){
+					if(!bfill[ig]) continue; 
+					fhRecoilJetPhiTTH_PartLevel[ig]->Fill(ptjetcorr, dphi);
+			   }
 
-               if(TMath::Abs((Float_t) TVector2::Phi_mpi_pi(dphi)) < fkDeltaPhiCut) continue;
-  	       for(Int_t ig=0; ig< kTRIG; ig++){
-                  if(!bfill[ig]) continue;
-                  fhRecoilJetPtTTH_PartLevel[ig]->Fill(ptjetcorr);
-	       }
+			   if(TMath::Abs((Float_t) TVector2::Phi_mpi_pi(dphi)) < fkDeltaPhiCut) continue;
+			   for(Int_t ig=0; ig< kTRIG; ig++){
+				  	if(!bfill[ig]) continue;
+				  	fhRecoilJetPtTTH_PartLevel[ig]->Fill(ptjetcorr);
+			   }
 
             }//jet loop
          }//etacut
