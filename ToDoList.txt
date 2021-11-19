@@ -1,0 +1,40 @@
+ToDo list
+------------------------------------------------------------
+Set |eta| < 0.9 - Done!
+Add eta, phi, eta_jet, phi_jet histogram - Done!
+------------------------------------------------------------
+Add DeltaPhi & pT graph - Done!
+Add jet area & pT graph - Done!
+------------------------------------------------------------
+Jet area graph TH2I -> TH2D - Done!
+Set pT cutoff as 0.15 GeV - Done!
+Make corrections in code for delta_phi - Done!
+Recalculate delta_phi using correct code - Done!
+------------------------------------------------------------
+Add hard bin code:
+- set minmax bias - Done!
+- add Xsection and nTrials hists - Done!
+- write summation code and create sum histo - Done!
+- put unsummed hists in separate folder - Done!
+- rescale pT spectrum into Xsection vs pT - Done!
+- perform calculations with large number of entries - Done!
+------------------------------------------------------------
+Add soft bin code:
+- add Xsection and nTrials hists - Done!
+- put them into separate folder - Done!
+- rescale pT spectrum into Xsection vs pT - Done!
+- perform calculations with large number of entries - Done!
+------------------------------------------------------------
+Add canvas with comparison of obtained results - Done!
+-----------------------------------------------------------
+Fix errors:
+- Fill X axis by jet pT data in angular difference loop - Done;
+- Make a function that calculates angles properly in 0..2pi region - Done! (RecalcAngle function)
+IDEA: make .h file with a set of defined functions - Done;
+- Put source files in separate folders for different purposes - Done;
+--------------------------------------------------------------
+- Add kT clustering sequence code in script - Done;
+- Add code that subtracts underlying events from anti-kT-calculated results for pT - Done;
+- Add code that compares pT histograms for kT, anti-kT and corrected anti-kT sequences - Processing...
+- Recalculate angular difference - Processing...
+- Create an executable that contains the comparison for both soft (min bias) and hard bins simulation results - Done;
